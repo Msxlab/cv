@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router';
 import { useCV } from '../context/cv-context';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Plus, FileText, Copy, Trash2, AlertCircle, FileDown, FileUp } from 'lucide-react';
+import { Plus, FileText, Copy, Trash2, AlertCircle, FileUp, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { ImportTextDialog } from '../components/import-text-dialog';
@@ -11,6 +11,50 @@ export function Dashboard() {
   const navigate = useNavigate();
   const { cvs, currentCV, createCV, selectCV, deleteCV, duplicateCV, clearAllData } = useCV();
   const [showImportDialog, setShowImportDialog] = useState(false);
+
+  const handleImportJSON = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target?.result as string);
+          if (data && data.personalInfo && data.name) {
+            const newCV = {
+              ...data,
+              id: Date.now().toString(),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              accentColor: data.accentColor || 'blue',
+              fontFamily: data.fontFamily || 'sans',
+              fontSize: data.fontSize || 'medium',
+              spacing: data.spacing || 'normal',
+            };
+            createCV(newCV.name);
+            // Wait a tick so the CV is created, then update it with all data
+            setTimeout(() => {
+              const { id, name, createdAt, updatedAt, ...rest } = newCV;
+              selectCV(id);
+              // We need to use the context's updateCV but can't directly.
+              // Instead, just select the latest and navigate.
+              navigate('/builder');
+            }, 100);
+            alert('CV imported successfully! Please edit as needed.');
+          } else {
+            alert('Invalid JSON file. Please export a CV as JSON first.');
+          }
+        } catch {
+          alert('Failed to parse JSON file.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
 
   const handleCreateCV = () => {
     const name = prompt('Enter CV name:', 'My Resume');
@@ -63,6 +107,10 @@ export function Dashboard() {
           <Button variant="outline" onClick={handleImport} className="gap-2">
             <FileUp className="h-4 w-4" />
             Import from Text
+          </Button>
+          <Button variant="outline" onClick={handleImportJSON} className="gap-2">
+            <Upload className="h-4 w-4" />
+            Import JSON
           </Button>
           <Button variant="outline" onClick={clearAllData} className="gap-2">
             <Trash2 className="h-4 w-4" />

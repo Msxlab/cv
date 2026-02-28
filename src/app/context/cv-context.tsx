@@ -31,6 +31,10 @@ const createEmptyCV = (name: string): CVData => ({
   language: 'en',
   template: 'modern',
   layout: 'single',
+  accentColor: 'blue',
+  fontFamily: 'sans',
+  fontSize: 'medium',
+  spacing: 'normal',
   showPhoto: true,
   personalInfo: {
     firstName: '',
@@ -80,38 +84,34 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [history, setHistory] = useState<CVData[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
-  // Initialize with one empty CV
+  // Initialize: load from sessionStorage, or create a fresh empty CV
   useEffect(() => {
-    const initialCV = createEmptyCV('My Resume');
-    setCVs([initialCV]);
-    setCurrentCV(initialCV);
-    setHistory([[initialCV]]);
-    setHistoryIndex(0);
+    const savedCVs = sessionStorage.getItem('cvs');
+    const savedCurrentCVId = sessionStorage.getItem('currentCVId');
+
+    if (savedCVs) {
+      const parsedCVs = JSON.parse(savedCVs);
+      setCVs(parsedCVs);
+      const current = parsedCVs.find((cv: CVData) => cv.id === savedCurrentCVId);
+      setCurrentCV(current || parsedCVs[0] || null);
+      setHistory([parsedCVs]);
+      setHistoryIndex(0);
+    } else {
+      const initialCV = createEmptyCV('My Resume');
+      setCVs([initialCV]);
+      setCurrentCV(initialCV);
+      setHistory([[initialCV]]);
+      setHistoryIndex(0);
+    }
   }, []);
 
-  // Auto-save to session storage
+  // Auto-save to sessionStorage
   useEffect(() => {
     if (cvs.length > 0) {
       sessionStorage.setItem('cvs', JSON.stringify(cvs));
       sessionStorage.setItem('currentCVId', currentCV?.id || '');
     }
   }, [cvs, currentCV]);
-
-  // Load from session storage on mount
-  useEffect(() => {
-    const savedCVs = sessionStorage.getItem('cvs');
-    const savedCurrentCVId = sessionStorage.getItem('currentCVId');
-    
-    if (savedCVs) {
-      const parsedCVs = JSON.parse(savedCVs);
-      setCVs(parsedCVs);
-      
-      if (savedCurrentCVId) {
-        const current = parsedCVs.find((cv: CVData) => cv.id === savedCurrentCVId);
-        if (current) setCurrentCV(current);
-      }
-    }
-  }, []);
 
   const createCV = useCallback((name: string) => {
     const newCV = createEmptyCV(name);
@@ -146,8 +146,8 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const deleteCV = useCallback((id: string) => {
     setCVs(prev => {
       const filtered = prev.filter(cv => cv.id !== id);
-      if (currentCV?.id === id && filtered.length > 0) {
-        setCurrentCV(filtered[0]);
+      if (currentCV?.id === id) {
+        setCurrentCV(filtered.length > 0 ? filtered[0] : null);
       }
       return filtered;
     });

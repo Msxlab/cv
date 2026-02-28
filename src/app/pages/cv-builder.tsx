@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useCV } from '../context/cv-context';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'react-resizable-panels';
+import { Panel as ResizablePanel, PanelGroup as ResizablePanelGroup, PanelResizeHandle as ResizableHandle } from 'react-resizable-panels';
 import {
   Home,
   Download,
@@ -12,9 +12,6 @@ import {
   Eye,
   Settings,
   FileText,
-  Sparkles,
-  Target,
-  BarChart3,
   HelpCircle,
 } from 'lucide-react';
 import { CVPreview } from '../components/cv-preview';
@@ -25,11 +22,13 @@ import { SkillsEditor } from '../components/editors/skills-editor';
 import { ProjectsEditor } from '../components/editors/projects-editor';
 import { CertificationsEditor } from '../components/editors/certifications-editor';
 import { LanguagesEditor } from '../components/editors/languages-editor';
+import { AchievementsEditor } from '../components/editors/achievements-editor';
+import { VolunteersEditor } from '../components/editors/volunteers-editor';
+import { PublicationsEditor } from '../components/editors/publications-editor';
+import { ReferencesEditor } from '../components/editors/references-editor';
+import { CustomSectionsEditor } from '../components/editors/custom-sections-editor';
 import { SettingsPanel } from '../components/settings-panel';
-import { ATSPanel } from '../components/ats-panel';
-import { JobMatchPanel } from '../components/job-match-panel';
 import { ExportDialog } from '../components/export-dialog';
-import { ContentSuggestionsPanel } from '../components/content-suggestions-panel';
 import { HelpDialog } from '../components/help-dialog';
 
 export function CVBuilder() {
@@ -40,10 +39,26 @@ export function CVBuilder() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
 
-  if (!currentCV) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (!currentCV) {
+      navigate('/');
+    }
+  }, [currentCV, navigate]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+        if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+        if (e.key === 's') { e.preventDefault(); setShowExportDialog(true); }
+        if (e.key === 'p') { e.preventDefault(); setShowPreview(prev => !prev); }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
+
+  if (!currentCV) return null;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -133,17 +148,20 @@ export function CVBuilder() {
                     <TabsTrigger value="languages" className="gap-2">
                       Languages
                     </TabsTrigger>
-                    <TabsTrigger value="suggestions" className="gap-2">
-                      <Sparkles className="h-4 w-4" />
-                      Suggestions
+                    <TabsTrigger value="achievements" className="gap-2">
+                      Awards
                     </TabsTrigger>
-                    <TabsTrigger value="ats" className="gap-2">
-                      <BarChart3 className="h-4 w-4" />
-                      ATS
+                    <TabsTrigger value="volunteers" className="gap-2">
+                      Volunteer
                     </TabsTrigger>
-                    <TabsTrigger value="job-match" className="gap-2">
-                      <Target className="h-4 w-4" />
-                      Job Match
+                    <TabsTrigger value="publications" className="gap-2">
+                      Publications
+                    </TabsTrigger>
+                    <TabsTrigger value="references" className="gap-2">
+                      References
+                    </TabsTrigger>
+                    <TabsTrigger value="custom" className="gap-2">
+                      Custom
                     </TabsTrigger>
                     <TabsTrigger value="settings" className="gap-2">
                       <Settings className="h-4 w-4" />
@@ -174,14 +192,20 @@ export function CVBuilder() {
                   <TabsContent value="languages" className="mt-0">
                     <LanguagesEditor />
                   </TabsContent>
-                  <TabsContent value="suggestions" className="mt-0">
-                    <ContentSuggestionsPanel />
+                  <TabsContent value="achievements" className="mt-0">
+                    <AchievementsEditor />
                   </TabsContent>
-                  <TabsContent value="ats" className="mt-0">
-                    <ATSPanel />
+                  <TabsContent value="volunteers" className="mt-0">
+                    <VolunteersEditor />
                   </TabsContent>
-                  <TabsContent value="job-match" className="mt-0">
-                    <JobMatchPanel />
+                  <TabsContent value="publications" className="mt-0">
+                    <PublicationsEditor />
+                  </TabsContent>
+                  <TabsContent value="references" className="mt-0">
+                    <ReferencesEditor />
+                  </TabsContent>
+                  <TabsContent value="custom" className="mt-0">
+                    <CustomSectionsEditor />
                   </TabsContent>
                   <TabsContent value="settings" className="mt-0">
                     <SettingsPanel />
@@ -194,7 +218,7 @@ export function CVBuilder() {
           {/* Preview Panel */}
           {showPreview && (
             <>
-              <ResizableHandle withHandle />
+              <ResizableHandle />
               <ResizablePanel defaultSize={50} minSize={30}>
                 <div className="h-full bg-gray-100 overflow-auto">
                   <CVPreview />

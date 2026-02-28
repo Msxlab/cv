@@ -12,7 +12,8 @@ export function ATSPanel() {
     if (currentCV) {
       analyzeATS();
     }
-  }, [currentCV, analyzeATS]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentCV]);
 
   if (!currentCV) return null;
 

@@ -1,3 +1,14 @@
+import { format } from 'date-fns';
+
+export function safeFormat(dateStr: string | undefined | null, fmt: string): string {
+  if (!dateStr) return '';
+  // Handle YYYY-MM format from <input type="month"> by appending day
+  const normalized = /^\d{4}-\d{2}$/.test(dateStr) ? `${dateStr}-01` : dateStr;
+  const d = new Date(normalized);
+  if (isNaN(d.getTime())) return '';
+  return format(d, fmt);
+}
+
 // Action verbs for CV writing
 export const actionVerbs = {
   leadership: [

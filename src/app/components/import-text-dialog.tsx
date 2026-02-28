@@ -11,7 +11,7 @@ interface ImportTextDialogProps {
 }
 
 export function ImportTextDialog({ onClose }: ImportTextDialogProps) {
-  const { updateCV } = useCV();
+  const { currentCV, updateCV } = useCV();
   const [text, setText] = useState('');
 
   const handleImport = () => {
@@ -48,14 +48,15 @@ export function ImportTextDialog({ onClose }: ImportTextDialogProps) {
 
     updateCV({
       personalInfo: {
-        firstName,
-        lastName,
-        email,
-        phone,
-        headline: '',
-        summary: '',
-        location: '',
-        otherLinks: [],
+        ...currentCV?.personalInfo,
+        firstName: firstName || currentCV?.personalInfo?.firstName || '',
+        lastName: lastName || currentCV?.personalInfo?.lastName || '',
+        email: email || currentCV?.personalInfo?.email || '',
+        phone: phone || currentCV?.personalInfo?.phone || '',
+        headline: currentCV?.personalInfo?.headline || '',
+        summary: currentCV?.personalInfo?.summary || '',
+        location: currentCV?.personalInfo?.location || '',
+        otherLinks: currentCV?.personalInfo?.otherLinks || [],
       },
       skills,
     });

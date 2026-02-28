@@ -1,5 +1,15 @@
 export type Language = 'tr' | 'en' | 'fr' | 'de' | 'es';
 
+export type AccentColor = 'blue' | 'red' | 'emerald' | 'violet' | 'amber' | 'rose' | 'slate' | 'cyan' | 'indigo' | 'pink' | 'orange' | 'teal' | 'lime' | 'sky' | 'fuchsia' | 'yellow' | 'stone' | 'zinc' | 'neutral' | 'ruby' | 'sapphire' | 'forest' | 'wine' | 'navy' | 'coral' | 'maroon';
+
+export type FontFamily = string;
+
+export type FontSize = 'small' | 'medium' | 'large';
+
+export type Spacing = 'compact' | 'normal' | 'relaxed';
+
+export type TemplateName = 'classic' | 'modern' | 'executive' | 'technical' | 'creative' | 'minimalist' | 'elegant' | 'compact' | 'academic' | 'infographic' | 'bold' | 'twotone' | 'timeline' | 'metro' | 'newspaper' | 'gradient' | 'swiss';
+
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 
 export interface PersonalInfo {
@@ -112,6 +122,7 @@ export interface Reference {
   company: string;
   email: string;
   phone?: string;
+  relationship?: string;
 }
 
 export interface CustomSection {
@@ -124,8 +135,12 @@ export interface CVData {
   id: string;
   name: string;
   language: Language;
-  template: 'classic' | 'modern' | 'executive' | 'technical' | 'creative';
+  template: TemplateName;
   layout: 'single' | 'double';
+  accentColor: AccentColor;
+  fontFamily: FontFamily;
+  fontSize: FontSize;
+  spacing: Spacing;
   showPhoto: boolean;
   personalInfo: PersonalInfo;
   experiences: Experience[];

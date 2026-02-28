@@ -58,45 +58,47 @@ export function LanguagesEditor() {
         </Card>
       )}
 
-      <Card>
-        <CardContent className="pt-6 space-y-3">
-          {languages.map((lang) => (
-            <div key={lang.id} className="flex gap-2 items-center">
-              <div className="flex-1">
-                <Input
-                  value={lang.language}
-                  onChange={(e) => updateLanguage(lang.id, 'language', e.target.value)}
-                  placeholder="Language name"
-                />
-              </div>
-              <div className="w-48">
-                <Select
-                  value={lang.proficiency}
-                  onValueChange={(value) => updateLanguage(lang.id, 'proficiency', value as any)}
+      {languages.length > 0 && (
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            {languages.map((lang) => (
+              <div key={lang.id} className="flex gap-2 items-center">
+                <div className="flex-1">
+                  <Input
+                    value={lang.language}
+                    onChange={(e) => updateLanguage(lang.id, 'language', e.target.value)}
+                    placeholder="Language name"
+                  />
+                </div>
+                <div className="w-48">
+                  <Select
+                    value={lang.proficiency}
+                    onValueChange={(value) => updateLanguage(lang.id, 'proficiency', value as any)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="native">Native</SelectItem>
+                      <SelectItem value="fluent">Fluent</SelectItem>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="basic">Basic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => removeLanguage(lang.id)}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="native">Native</SelectItem>
-                    <SelectItem value="fluent">Fluent</SelectItem>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="basic">Basic</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => removeLanguage(lang.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

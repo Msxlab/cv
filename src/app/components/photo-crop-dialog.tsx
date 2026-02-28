@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
@@ -18,13 +18,13 @@ export function PhotoCropDialog({ imageFile, onSave, onClose }: PhotoCropDialogP
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
   // Load image
-  useState(() => {
+  useEffect(() => {
     const reader = new FileReader();
     reader.onload = () => {
       setImageSrc(reader.result as string);
     };
     reader.readAsDataURL(imageFile);
-  });
+  }, [imageFile]);
 
   const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);

@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 
+
 interface ExportDialogProps {
   onClose: () => void;
 }
@@ -24,6 +25,42 @@ export function ExportDialog({ onClose }: ExportDialogProps) {
     return `${name}-${role}-resume`.replace(/[^a-z0-9-]/g, '');
   };
 
+  const resolveOklch = (value: string): string => {
+    if (!value.includes('oklch')) return value;
+    return value.replace(/oklch\([^)]*\)/gi, (match) => {
+      const temp = document.createElement('div');
+      temp.style.color = match;
+      document.body.appendChild(temp);
+      const resolved = getComputedStyle(temp).color;
+      document.body.removeChild(temp);
+      return resolved;
+    });
+  };
+
+  const inlineComputedStyles = (sourceEl: HTMLElement, targetEl: HTMLElement) => {
+    const computed = window.getComputedStyle(sourceEl);
+    for (let i = 0; i < computed.length; i++) {
+      const prop = computed.item(i);
+      targetEl.style.setProperty(
+        prop,
+        resolveOklch(computed.getPropertyValue(prop)),
+        computed.getPropertyPriority(prop),
+      );
+    }
+
+    targetEl.className = '';
+
+    const sourceChildren = Array.from(sourceEl.children) as HTMLElement[];
+    const targetChildren = Array.from(targetEl.children) as HTMLElement[];
+
+    sourceChildren.forEach((sourceChild, index) => {
+      const targetChild = targetChildren[index];
+      if (targetChild) {
+        inlineComputedStyles(sourceChild, targetChild);
+      }
+    });
+  };
+
   const exportToPDF = async () => {
     setExporting(true);
     try {
@@ -34,6 +71,13 @@ export function ExportDialog({ onClose }: ExportDialogProps) {
         scale: 2,
         useCORS: true,
         logging: false,
+        backgroundColor: '#ffffff',
+        onclone: (clonedDoc) => {
+          const clonedPreview = clonedDoc.getElementById('cv-preview') as HTMLElement | null;
+          if (!clonedPreview) return;
+          inlineComputedStyles(element, clonedPreview);
+          clonedDoc.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => el.remove());
+        },
       });
 
       const imgData = canvas.toDataURL('image/png');

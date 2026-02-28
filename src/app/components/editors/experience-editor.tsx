@@ -5,7 +5,7 @@ import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
-import { Plus, Trash2, Sparkles } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Experience } from '../../types/cv';
 import { QuickTips } from '../quick-tips';
 

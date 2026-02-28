@@ -3,7 +3,10 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Switch } from './ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Language } from '../types/cv';
+import { Button } from './ui/button';
+import { Language, AccentColor, FontSize, Spacing, TemplateName } from '../types/cv';
+import { accentColorOptions, templateOptions, fontFamilies, fontSizes, spacings, loadGoogleFont } from '../utils/template-styles';
+import { Check, Palette, Type, Maximize2, LayoutGrid } from 'lucide-react';
 
 export function SettingsPanel() {
   const { currentCV, updateCV } = useCV();
@@ -14,34 +17,182 @@ export function SettingsPanel() {
     <div className="space-y-6 max-w-3xl">
       <div>
         <h2 className="text-2xl mb-2">CV Settings</h2>
-        <p className="text-gray-600">Customize your CV appearance and language</p>
+        <p className="text-gray-600">Customize your CV appearance, colors, fonts, and style</p>
       </div>
 
+      {/* Template Selector - Visual Grid */}
       <Card>
         <CardHeader>
-          <CardTitle>Template & Layout</CardTitle>
-          <CardDescription>Choose how your CV should look</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <LayoutGrid className="h-5 w-5" />
+            Template
+          </CardTitle>
+          <CardDescription>Choose a design template for your CV</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {templateOptions.map((tmpl) => (
+              <button
+                key={tmpl.value}
+                onClick={() => updateCV({ template: tmpl.value as TemplateName })}
+                className={`relative text-left p-3 rounded-lg border-2 transition-all hover:shadow-md ${
+                  currentCV.template === tmpl.value
+                    ? 'border-blue-500 bg-blue-50 shadow-md'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {currentCV.template === tmpl.value && (
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                    <Check className="h-3 w-3 text-white" />
+                  </div>
+                )}
+                <p className="font-semibold text-sm">{tmpl.label}</p>
+                <p className="text-xs text-gray-500 mt-1">{tmpl.description}</p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Accent Color Picker */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Accent Color
+          </CardTitle>
+          <CardDescription>Choose the primary color used throughout your CV</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            {accentColorOptions.map((color) => (
+              <button
+                key={color.value}
+                onClick={() => updateCV({ accentColor: color.value as AccentColor })}
+                className={`group relative flex flex-col items-center gap-1`}
+                title={color.label}
+              >
+                <div
+                  className={`w-10 h-10 rounded-full border-2 transition-all ${
+                    currentCV.accentColor === color.value
+                      ? 'border-gray-900 scale-110 shadow-lg'
+                      : 'border-transparent hover:scale-105 hover:shadow-md'
+                  }`}
+                  style={{ backgroundColor: color.swatch }}
+                >
+                  {currentCV.accentColor === color.value && (
+                    <div className="w-full h-full rounded-full flex items-center justify-center">
+                      <Check className="h-5 w-5 text-white drop-shadow-md" />
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-gray-600">{color.label}</span>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Font Family Selector */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Type className="h-5 w-5" />
+            Font Family ({Object.keys(fontFamilies).length} fonts)
+          </CardTitle>
+          <CardDescription>Choose the font style for your CV text</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
+            {Object.entries(
+              Object.entries(fontFamilies).reduce((acc, [key, font]) => {
+                if (!acc[font.category]) acc[font.category] = [];
+                acc[font.category].push({ key, ...font });
+                return acc;
+              }, {} as Record<string, Array<{ key: string; label: string; css: string; google?: string; category: string }>>)
+            ).map(([category, fonts]) => (
+              <div key={category}>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{category}</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {fonts.map((font) => {
+                    if (font.google) loadGoogleFont(font.key);
+                    return (
+                      <button
+                        key={font.key}
+                        onClick={() => updateCV({ fontFamily: font.key })}
+                        className={`p-2 rounded-lg border-2 text-left transition-all ${
+                          currentCV.fontFamily === font.key
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <p className="text-xs font-medium truncate">{font.label}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 truncate" style={{ fontFamily: font.css }}>
+                          Abc 123
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Font Size */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Maximize2 className="h-5 w-5" />
+            Font Size & Spacing
+          </CardTitle>
+          <CardDescription>Control the text size and section spacing</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
           <div>
-            <Label>Template</Label>
-            <Select
-              value={currentCV.template}
-              onValueChange={(value) => updateCV({ template: value as any })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="modern">Modern</SelectItem>
-                <SelectItem value="classic">Classic</SelectItem>
-                <SelectItem value="executive">Executive</SelectItem>
-                <SelectItem value="technical">Technical</SelectItem>
-                <SelectItem value="creative">Creative</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label className="mb-2 block">Font Size</Label>
+            <div className="flex gap-2">
+              {(Object.entries(fontSizes) as [FontSize, typeof fontSizes[FontSize]][]).map(([key, size]) => (
+                <Button
+                  key={key}
+                  variant={currentCV.fontSize === key ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => updateCV({ fontSize: key })}
+                  className="flex-1"
+                >
+                  {size.label}
+                </Button>
+              ))}
+            </div>
           </div>
 
+          <div>
+            <Label className="mb-2 block">Section Spacing</Label>
+            <div className="flex gap-2">
+              {(Object.entries(spacings) as [Spacing, typeof spacings[Spacing]][]).map(([key, space]) => (
+                <Button
+                  key={key}
+                  variant={currentCV.spacing === key ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => updateCV({ spacing: key })}
+                  className="flex-1"
+                >
+                  {space.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Layout & Photo */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Layout & Photo</CardTitle>
+          <CardDescription>Configure layout structure and photo visibility</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
             <Label>Layout</Label>
             <Select
@@ -71,6 +222,7 @@ export function SettingsPanel() {
         </CardContent>
       </Card>
 
+      {/* Language */}
       <Card>
         <CardHeader>
           <CardTitle>Language & Localization</CardTitle>
@@ -98,6 +250,7 @@ export function SettingsPanel() {
         </CardContent>
       </Card>
 
+      {/* CV Name */}
       <Card>
         <CardHeader>
           <CardTitle>CV Name</CardTitle>
