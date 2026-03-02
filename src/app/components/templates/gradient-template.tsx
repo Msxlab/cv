@@ -1,6 +1,6 @@
 import { CVData } from '../../types/cv';
 import { safeFormat } from '../../utils/content-helpers';
-import { accentColors, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +8,7 @@ interface TemplateProps {
 
 export function GradientTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages } = cv;
-  const c = accentColors[cv.accentColor || 'indigo'] || accentColors['indigo'];
+  const c = getAccentColor(cv.accentColor || 'blue') || accentColors['indigo'];
   const sp = spacings[cv.spacing || 'normal'];
   const style = getTemplateStyle(cv.fontFamily || 'sans', cv.fontSize || 'medium');
 

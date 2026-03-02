@@ -34,13 +34,9 @@ export function Dashboard() {
               fontSize: data.fontSize || 'medium',
               spacing: data.spacing || 'normal',
             };
-            createCV(newCV.name);
-            // Wait a tick so the CV is created, then update it with all data
+            createCV(newCV.name, newCV);
+            // Wait a tick so the CV is created, then navigate.
             setTimeout(() => {
-              const { id, name, createdAt, updatedAt, ...rest } = newCV;
-              selectCV(id);
-              // We need to use the context's updateCV but can't directly.
-              // Instead, just select the latest and navigate.
               navigate('/builder');
             }, 100);
             alert('CV imported successfully! Please edit as needed.');

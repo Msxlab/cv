@@ -9,7 +9,7 @@ interface CVContextType {
   suggestions: ContentSuggestion[];
   history: CVData[][];
   historyIndex: number;
-  createCV: (name: string) => void;
+  createCV: (name: string, initialData?: Partial<CVData>) => void;
   selectCV: (id: string) => void;
   updateCV: (data: Partial<CVData>) => void;
   deleteCV: (id: string) => void;
@@ -113,8 +113,12 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   }, [cvs, currentCV]);
 
-  const createCV = useCallback((name: string) => {
-    const newCV = createEmptyCV(name);
+  const createCV = useCallback((name: string, initialData?: Partial<CVData>) => {
+    const newCV = { ...createEmptyCV(name), ...initialData };
+    if (initialData?.id) newCV.id = initialData.id;
+    if (initialData?.createdAt) newCV.createdAt = initialData.createdAt;
+    if (initialData?.updatedAt) newCV.updatedAt = initialData.updatedAt;
+    
     setCVs(prev => [...prev, newCV]);
     setCurrentCV(newCV);
   }, []);
@@ -133,15 +137,22 @@ export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       updatedAt: new Date().toISOString(),
     };
 
-    setCVs(prev => prev.map(cv => cv.id === currentCV.id ? updatedCV : cv));
     setCurrentCV(updatedCV);
-
-    // Update history for undo/redo
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(cvs.map(cv => cv.id === currentCV.id ? updatedCV : cv));
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  }, [currentCV, cvs, history, historyIndex]);
+    
+    setCVs(prevCVs => {
+      const newCVs = prevCVs.map(cv => cv.id === currentCV.id ? updatedCV : cv);
+      
+      // Update history for undo/redo
+      setHistory(prevHistory => {
+        const newHistory = prevHistory.slice(0, historyIndex + 1);
+        newHistory.push(newCVs);
+        return newHistory;
+      });
+      setHistoryIndex(prevIndex => prevIndex + 1);
+      
+      return newCVs;
+    });
+  }, [currentCV, historyIndex]);
 
   const deleteCV = useCallback((id: string) => {
     setCVs(prev => {

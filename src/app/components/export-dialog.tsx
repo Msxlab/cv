@@ -1,13 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useCV } from '../context/cv-context';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { FileText, Download, Copy, FileJson } from 'lucide-react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { useReactToPrint } from 'react-to-print';
 import { toast } from 'sonner';
-
 
 interface ExportDialogProps {
   onClose: () => void;
@@ -25,81 +23,32 @@ export function ExportDialog({ onClose }: ExportDialogProps) {
     return `${name}-${role}-resume`.replace(/[^a-z0-9-]/g, '');
   };
 
-  const resolveOklch = (value: string): string => {
-    if (!value.includes('oklch')) return value;
-    return value.replace(/oklch\([^)]*\)/gi, (match) => {
-      const temp = document.createElement('div');
-      temp.style.color = match;
-      document.body.appendChild(temp);
-      const resolved = getComputedStyle(temp).color;
-      document.body.removeChild(temp);
-      return resolved;
-    });
-  };
-
-  const inlineComputedStyles = (sourceEl: HTMLElement, targetEl: HTMLElement) => {
-    const computed = window.getComputedStyle(sourceEl);
-    for (let i = 0; i < computed.length; i++) {
-      const prop = computed.item(i);
-      targetEl.style.setProperty(
-        prop,
-        resolveOklch(computed.getPropertyValue(prop)),
-        computed.getPropertyPriority(prop),
-      );
-    }
-
-    targetEl.className = '';
-
-    const sourceChildren = Array.from(sourceEl.children) as HTMLElement[];
-    const targetChildren = Array.from(targetEl.children) as HTMLElement[];
-
-    sourceChildren.forEach((sourceChild, index) => {
-      const targetChild = targetChildren[index];
-      if (targetChild) {
-        inlineComputedStyles(sourceChild, targetChild);
-      }
-    });
-  };
-
-  const exportToPDF = async () => {
-    setExporting(true);
-    try {
-      const element = document.getElementById('cv-preview');
-      if (!element) throw new Error('CV preview not found');
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        onclone: (clonedDoc) => {
-          const clonedPreview = clonedDoc.getElementById('cv-preview') as HTMLElement | null;
-          if (!clonedPreview) return;
-          inlineComputedStyles(element, clonedPreview);
-          clonedDoc.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => el.remove());
-        },
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save(`${generateFileName()}.pdf`);
-
+  const handlePrint = useReactToPrint({
+    content: () => document.getElementById('cv-preview'),
+    documentTitle: generateFileName(),
+    onBeforeGetContent: () => {
+      setExporting(true);
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      setExporting(false);
       toast.success('PDF exported successfully!');
-    } catch (error) {
+    },
+    onPrintError: (error) => {
+      setExporting(false);
       console.error('Export error:', error);
       toast.error('Failed to export PDF');
-    } finally {
-      setExporting(false);
+    },
+    removeAfterPrint: true,
+  });
+
+  const exportToPDF = () => {
+    const element = document.getElementById('cv-preview');
+    if (!element) {
+      toast.error('CV preview not found. Please make sure the preview is visible.');
+      return;
     }
+    handlePrint();
   };
 
   const exportToJSON = () => {

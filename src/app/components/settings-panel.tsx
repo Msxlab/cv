@@ -7,9 +7,13 @@ import { Button } from './ui/button';
 import { Language, AccentColor, FontSize, Spacing, TemplateName } from '../types/cv';
 import { accentColorOptions, templateOptions, fontFamilies, fontSizes, spacings, loadGoogleFont } from '../utils/template-styles';
 import { Check, Palette, Type, Maximize2, LayoutGrid } from 'lucide-react';
+import { useState } from 'react';
 
 export function SettingsPanel() {
   const { currentCV, updateCV } = useCV();
+  const [customColor, setCustomColor] = useState(
+    currentCV?.accentColor?.startsWith('#') ? currentCV.accentColor : '#000000'
+  );
 
   if (!currentCV) return null;
 
@@ -64,31 +68,48 @@ export function SettingsPanel() {
           <CardDescription>Choose the primary color used throughout your CV</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-3">
-            {accentColorOptions.map((color) => (
-              <button
-                key={color.value}
-                onClick={() => updateCV({ accentColor: color.value as AccentColor })}
-                className={`group relative flex flex-col items-center gap-1`}
-                title={color.label}
-              >
-                <div
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
-                    currentCV.accentColor === color.value
-                      ? 'border-gray-900 scale-110 shadow-lg'
-                      : 'border-transparent hover:scale-105 hover:shadow-md'
-                  }`}
-                  style={{ backgroundColor: color.swatch }}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border">
+              <Label htmlFor="custom-color" className="font-medium whitespace-nowrap">Custom Color:</Label>
+              <input
+                id="custom-color"
+                type="color"
+                value={customColor}
+                onChange={(e) => {
+                  setCustomColor(e.target.value);
+                  updateCV({ accentColor: e.target.value as AccentColor });
+                }}
+                className="w-10 h-10 rounded cursor-pointer border-0 p-0"
+              />
+              <span className="text-sm text-gray-600 uppercase font-mono">{customColor}</span>
+            </div>
+            
+            <div className="flex flex-wrap gap-3 mt-2">
+              {accentColorOptions.map((color) => (
+                <button
+                  key={color.value}
+                  onClick={() => updateCV({ accentColor: color.value as AccentColor })}
+                  className={`group relative flex flex-col items-center gap-1`}
+                  title={color.label}
                 >
-                  {currentCV.accentColor === color.value && (
-                    <div className="w-full h-full rounded-full flex items-center justify-center">
-                      <Check className="h-5 w-5 text-white drop-shadow-md" />
-                    </div>
-                  )}
-                </div>
-                <span className="text-xs text-gray-600">{color.label}</span>
-              </button>
-            ))}
+                  <div
+                    className={`w-10 h-10 rounded-full border-2 transition-all ${
+                      currentCV.accentColor === color.value
+                        ? 'border-gray-900 scale-110 shadow-lg'
+                        : 'border-transparent hover:scale-105 hover:shadow-md'
+                    }`}
+                    style={{ backgroundColor: color.swatch }}
+                  >
+                    {currentCV.accentColor === color.value && (
+                      <div className="w-full h-full rounded-full flex items-center justify-center">
+                        <Check className="h-5 w-5 text-white drop-shadow-md" />
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-600">{color.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

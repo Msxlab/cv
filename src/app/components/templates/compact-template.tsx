@@ -1,6 +1,6 @@
 import { CVData } from '../../types/cv';
 import { safeFormat } from '../../utils/content-helpers';
-import { accentColors, getTemplateStyle } from '../../utils/template-styles';
+import { getAccentColor, getTemplateStyle } from '../../utils/template-styles';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +8,7 @@ interface TemplateProps {
 
 export function CompactTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages } = cv;
-  const c = accentColors[cv.accentColor || 'blue'];
+  const c = getAccentColor(cv.accentColor || 'blue');
   const style = getTemplateStyle(cv.fontFamily || 'sans', 'small');
 
   return (

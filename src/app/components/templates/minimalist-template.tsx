@@ -1,6 +1,6 @@
 import { CVData } from '../../types/cv';
 import { safeFormat } from '../../utils/content-helpers';
-import { accentColors, fontFamilies, spacings, getTemplateStyle } from '../../utils/template-styles';
+import { getAccentColor, fontFamilies, spacings, getTemplateStyle } from '../../utils/template-styles';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +8,7 @@ interface TemplateProps {
 
 export function MinimalistTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages, achievements, volunteers, publications, references } = cv;
-  const c = accentColors[cv.accentColor || 'blue'];
+  const c = getAccentColor(cv.accentColor || 'blue');
   const sp = spacings[cv.spacing || 'normal'];
   const style = getTemplateStyle(cv.fontFamily || 'sans', cv.fontSize || 'medium');
 

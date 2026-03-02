@@ -40,7 +40,15 @@ export const accentColorOptions: { value: AccentColor; label: string; swatch: st
   swatch: val.hex,
 }));
 
-// ==================== FONTS (45 total) ====================
+// Fallback for custom colors that start with #
+export const getAccentColor = (color: string): ColorDef => {
+  if (color.startsWith('#')) {
+    return makeColor(color, `${color}1A`); // 10% opacity for light hex
+  }
+  return accentColors[color] || accentColors['blue'];
+};
+
+// ==================== FONTS ====================
 export interface FontDef { label: string; css: string; google?: string; category: string }
 
 export const fontFamilies: Record<string, FontDef> = {
@@ -60,41 +68,26 @@ export const fontFamilies: Record<string, FontDef> = {
   ubuntu: { label: 'Ubuntu', css: '"Ubuntu", sans-serif', google: 'Ubuntu', category: 'Sans-Serif' },
   rubik: { label: 'Rubik', css: '"Rubik", sans-serif', google: 'Rubik', category: 'Sans-Serif' },
   worksans: { label: 'Work Sans', css: '"Work Sans", sans-serif', google: 'Work+Sans', category: 'Sans-Serif' },
-  karla: { label: 'Karla', css: '"Karla", sans-serif', google: 'Karla', category: 'Sans-Serif' },
-  cabin: { label: 'Cabin', css: '"Cabin", sans-serif', google: 'Cabin', category: 'Sans-Serif' },
-  quicksand: { label: 'Quicksand', css: '"Quicksand", sans-serif', google: 'Quicksand', category: 'Sans-Serif' },
-  sourcesans: { label: 'Source Sans 3', css: '"Source Sans 3", sans-serif', google: 'Source+Sans+3', category: 'Sans-Serif' },
-  mulish: { label: 'Mulish', css: '"Mulish", sans-serif', google: 'Mulish', category: 'Sans-Serif' },
-  firasans: { label: 'Fira Sans', css: '"Fira Sans", sans-serif', google: 'Fira+Sans', category: 'Sans-Serif' },
-  josefin: { label: 'Josefin Sans', css: '"Josefin Sans", sans-serif', google: 'Josefin+Sans', category: 'Sans-Serif' },
-  dmsans: { label: 'DM Sans', css: '"DM Sans", sans-serif', google: 'DM+Sans', category: 'Sans-Serif' },
-  manrope: { label: 'Manrope', css: '"Manrope", sans-serif', google: 'Manrope', category: 'Sans-Serif' },
-  outfit: { label: 'Outfit', css: '"Outfit", sans-serif', google: 'Outfit', category: 'Sans-Serif' },
-  sora: { label: 'Sora', css: '"Sora", sans-serif', google: 'Sora', category: 'Sans-Serif' },
-  spacegrotesk: { label: 'Space Grotesk', css: '"Space Grotesk", sans-serif', google: 'Space+Grotesk', category: 'Sans-Serif' },
-  plusjakarta: { label: 'Plus Jakarta Sans', css: '"Plus Jakarta Sans", sans-serif', google: 'Plus+Jakarta+Sans', category: 'Sans-Serif' },
+  ibmplexsans: { label: 'IBM Plex Sans', css: '"IBM Plex Sans", sans-serif', google: 'IBM+Plex+Sans', category: 'Sans-Serif' },
+  publicsans: { label: 'Public Sans', css: '"Public Sans", sans-serif', google: 'Public+Sans', category: 'Sans-Serif' },
   // Serif Google fonts
   playfair: { label: 'Playfair Display', css: '"Playfair Display", serif', google: 'Playfair+Display', category: 'Serif' },
   georgia: { label: 'Georgia', css: 'Georgia, "Times New Roman", serif', category: 'Serif' },
   merriweather: { label: 'Merriweather', css: '"Merriweather", serif', google: 'Merriweather', category: 'Serif' },
   lora: { label: 'Lora', css: '"Lora", serif', google: 'Lora', category: 'Serif' },
-  ptserif: { label: 'PT Serif', css: '"PT Serif", serif', google: 'PT+Serif', category: 'Serif' },
-  crimson: { label: 'Crimson Text', css: '"Crimson Text", serif', google: 'Crimson+Text', category: 'Serif' },
-  libre: { label: 'Libre Baskerville', css: '"Libre Baskerville", serif', google: 'Libre+Baskerville', category: 'Serif' },
-  sourceserif: { label: 'Source Serif 4', css: '"Source Serif 4", serif', google: 'Source+Serif+4', category: 'Serif' },
-  cormorant: { label: 'Cormorant Garamond', css: '"Cormorant Garamond", serif', google: 'Cormorant+Garamond', category: 'Serif' },
-  dmserif: { label: 'DM Serif Display', css: '"DM Serif Display", serif', google: 'DM+Serif+Display', category: 'Serif' },
-  bitter: { label: 'Bitter', css: '"Bitter", serif', google: 'Bitter', category: 'Serif' },
+  newsreader: { label: 'Newsreader', css: '"Newsreader", serif', google: 'Newsreader', category: 'Serif' },
   // Monospace Google fonts
   firacode: { label: 'Fira Code', css: '"Fira Code", monospace', google: 'Fira+Code', category: 'Monospace' },
   jetbrains: { label: 'JetBrains Mono', css: '"JetBrains Mono", monospace', google: 'JetBrains+Mono', category: 'Monospace' },
-  sourcecodepro: { label: 'Source Code Pro', css: '"Source Code Pro", monospace', google: 'Source+Code+Pro', category: 'Monospace' },
-  inconsolata: { label: 'Inconsolata', css: '"Inconsolata", monospace', google: 'Inconsolata', category: 'Monospace' },
-  spacemono: { label: 'Space Mono', css: '"Space Mono", monospace', google: 'Space+Mono', category: 'Monospace' },
+  ibmplexmono: { label: 'IBM Plex Mono', css: '"IBM Plex Mono", monospace', google: 'IBM+Plex+Mono', category: 'Monospace' },
+  victormono: { label: 'Victor Mono', css: '"Victor Mono", monospace', google: 'Victor+Mono', category: 'Monospace' },
+  // Handwriting / Creative
+  dancing: { label: 'Dancing Script', css: '"Dancing Script", cursive', google: 'Dancing+Script', category: 'Handwriting' },
+  caveat: { label: 'Caveat', css: '"Caveat", cursive', google: 'Caveat', category: 'Handwriting' },
+  pacifico: { label: 'Pacifico', css: '"Pacifico", cursive', google: 'Pacifico', category: 'Handwriting' },
   // Display / Special
   bebas: { label: 'Bebas Neue', css: '"Bebas Neue", sans-serif', google: 'Bebas+Neue', category: 'Display' },
   oswald: { label: 'Oswald', css: '"Oswald", sans-serif', google: 'Oswald', category: 'Display' },
-  anton: { label: 'Anton', css: '"Anton", sans-serif', google: 'Anton', category: 'Display' },
 };
 
 // Load Google Fonts dynamically
