@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -55,7 +56,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
                     <div className="flex justify-between items-baseline">
                       <h3 className="font-bold text-xs">{exp.position}</h3>
                       <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                        {exp.startDate && safeFormat(exp.startDate, 'MM/yy')} – {exp.current ? 'Now' : exp.endDate && safeFormat(exp.endDate, 'MM/yy')}
+                        {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MM/yy')}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500">{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
@@ -84,7 +85,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
                       <span className="text-gray-500 text-xs"> — {edu.institution}</span>
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                      {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Now' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                      {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                     </span>
                   </div>
                 ))}
@@ -156,9 +157,15 @@ export function CompactTemplate({ cv }: TemplateProps) {
           {(personalInfo.linkedin || personalInfo.github || personalInfo.website) && (
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider pb-0.5 mb-1.5" style={{ color: c.hex, borderBottomWidth: '1px', borderBottomColor: c.hex + '40', borderBottomStyle: 'solid' }}>Links</h2>
-              {personalInfo.linkedin && <p className="text-xs text-gray-600">LinkedIn</p>}
-              {personalInfo.github && <p className="text-xs text-gray-600">GitHub</p>}
-              {personalInfo.website && <p className="text-xs text-gray-600">{personalInfo.website.replace(/^https?:\/\//, '')}</p>}
+              <TemplateContactList
+                personalInfo={personalInfo}
+                language={cv.language}
+                accentColor={c.hex}
+                content="links"
+                layout="stacked"
+                className="space-y-1"
+                itemClassName="text-xs"
+              />
             </div>
           )}
         </div>

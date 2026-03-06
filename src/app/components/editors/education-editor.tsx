@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Plus, Trash2 } from 'lucide-react';
 import { Education } from '../../types/cv';
+import { DatePickerField } from '../date-picker-field';
 
 export function EducationEditor() {
   const { currentCV, updateCV } = useCV();
@@ -120,19 +121,17 @@ export function EducationEditor() {
 
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <Label>Start Year</Label>
-                <Input
-                  type="month"
+                <Label>Start Date</Label>
+                <DatePickerField
                   value={edu.startDate}
-                  onChange={(e) => updateEducation(edu.id, 'startDate', e.target.value)}
+                  onChange={(value) => updateEducation(edu.id, 'startDate', value)}
                 />
               </div>
               <div>
-                <Label>End Year</Label>
-                <Input
-                  type="month"
+                <Label>End Date</Label>
+                <DatePickerField
                   value={edu.endDate}
-                  onChange={(e) => updateEducation(edu.id, 'endDate', e.target.value)}
+                  onChange={(value) => updateEducation(edu.id, 'endDate', value)}
                   disabled={edu.current}
                 />
               </div>

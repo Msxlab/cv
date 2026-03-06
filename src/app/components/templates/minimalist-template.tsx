@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
-import { getAccentColor, fontFamilies, spacings, getTemplateStyle } from '../../utils/template-styles';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
+import { getAccentColor, spacings, getTemplateStyle } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -29,14 +30,13 @@ export function MinimalistTemplate({ cv }: TemplateProps) {
             <img src={personalInfo.photo} alt="Profile" className="w-16 h-16 rounded-full object-cover" style={{ borderColor: c.hex, borderWidth: '2px' }} />
           )}
         </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-gray-500 text-xs mt-3">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>{personalInfo.phone}</span>}
-          {personalInfo.location && <span>{personalInfo.location}</span>}
-          {personalInfo.website && <span>{personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-          {personalInfo.linkedin && <span>LinkedIn</span>}
-          {personalInfo.github && <span>GitHub</span>}
-        </div>
+        <TemplateContactList
+          personalInfo={personalInfo}
+          language={cv.language}
+          accentColor={c.hex}
+          className="text-gray-500 text-xs mt-3"
+          itemClassName="text-xs"
+        />
         <div className="mt-4 h-px bg-gray-200" />
       </div>
 
@@ -57,7 +57,7 @@ export function MinimalistTemplate({ cv }: TemplateProps) {
                 <div className="flex justify-between items-baseline">
                   <h3 className="font-medium">{exp.position}</h3>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
-                    {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                    {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                   </span>
                 </div>
                 <p className="text-gray-500 text-xs">{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
@@ -86,7 +86,7 @@ export function MinimalistTemplate({ cv }: TemplateProps) {
                   <p className="text-gray-500 text-xs">{edu.institution}</p>
                 </div>
                 <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
-                  {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                  {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                 </span>
               </div>
             ))}

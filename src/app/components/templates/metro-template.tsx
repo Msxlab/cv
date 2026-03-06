@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +9,7 @@ interface TemplateProps {
 
 export function MetroTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages } = cv;
-  const c = getAccentColor(cv.accentColor || 'blue') || accentColors['blue'];
+  const c = getAccentColor(cv.accentColor || 'blue');
   const sp = spacings[cv.spacing || 'normal'];
   const style = getTemplateStyle(cv.fontFamily || 'sans', cv.fontSize || 'medium');
 
@@ -24,18 +25,22 @@ export function MetroTemplate({ cv }: TemplateProps) {
           )}
         </div>
         <div className="p-4 text-white flex flex-col justify-center" style={{ backgroundColor: c.hex + 'cc' }}>
-          {personalInfo.email && <p className="text-xs mb-1 break-all">{personalInfo.email}</p>}
-          {personalInfo.phone && <p className="text-xs mb-1">{personalInfo.phone}</p>}
-          {personalInfo.location && <p className="text-xs">{personalInfo.location}</p>}
+          <TemplateContactList
+            personalInfo={personalInfo}
+            language={cv.language}
+            accentColor="#ffffff"
+            layout="stacked"
+            theme="dark"
+            className="space-y-1"
+            itemClassName="text-xs"
+          />
         </div>
         <div className="p-4 flex items-center justify-center" style={{ backgroundColor: c.hex + '99' }}>
           {cv.showPhoto && personalInfo.photo ? (
             <img src={personalInfo.photo} alt="Profile" className="w-20 h-20 rounded object-cover" />
           ) : (
-            <div className="text-white text-center text-xs space-y-1">
-              {personalInfo.linkedin && <p>LinkedIn</p>}
-              {personalInfo.github && <p>GitHub</p>}
-              {personalInfo.website && <p className="break-all">{personalInfo.website.replace(/^https?:\/\//, '')}</p>}
+            <div className="text-white text-center text-xs font-semibold">
+              {personalInfo.firstName?.[0]}{personalInfo.lastName?.[0]}
             </div>
           )}
         </div>
@@ -65,7 +70,7 @@ export function MetroTemplate({ cv }: TemplateProps) {
                       <p className="text-xs" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-3">
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -96,7 +101,7 @@ export function MetroTemplate({ cv }: TemplateProps) {
                     <p className="text-xs" style={{ color: c.hex }}>{edu.institution}</p>
                   </div>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-3">
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </span>
                 </div>
               ))}

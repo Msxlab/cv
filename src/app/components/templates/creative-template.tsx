@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -31,14 +32,14 @@ export function CreativeTemplate({ cv }: TemplateProps) {
             {personalInfo.headline && (
               <p className="text-white/80 text-base font-medium mb-2">{personalInfo.headline}</p>
             )}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-white/70 text-xs">
-              {personalInfo.email && <span>✉ {personalInfo.email}</span>}
-              {personalInfo.phone && <span>✆ {personalInfo.phone}</span>}
-              {personalInfo.location && <span>⊙ {personalInfo.location}</span>}
-              {personalInfo.linkedin && <span>in LinkedIn</span>}
-              {personalInfo.github && <span>⎔ GitHub</span>}
-              {personalInfo.website && <span>⌂ {personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-            </div>
+            <TemplateContactList
+              personalInfo={personalInfo}
+              language={cv.language}
+              accentColor="#ffffff"
+              theme="dark"
+              className="text-white/70 text-xs"
+              itemClassName="text-xs"
+            />
           </div>
         </div>
       </div>
@@ -147,7 +148,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                         <p className="font-medium text-xs" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                       </div>
                       <span className="text-xs px-2 py-0.5 rounded-full whitespace-nowrap ml-3 border" style={{ color: c.hex, backgroundColor: c.hex + '0a', borderColor: c.hex + '30' }}>
-                        {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Now' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                        {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                       </span>
                     </div>
                     {exp.responsibilities.length > 0 && (
@@ -193,7 +194,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                         {edu.gpa && <p className="text-gray-500 text-xs">GPA: {edu.gpa}</p>}
                       </div>
                       <span className="text-xs whitespace-nowrap ml-3" style={{ color: c.hex }}>
-                        {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Now' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                        {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                       </span>
                     </div>
                   </div>

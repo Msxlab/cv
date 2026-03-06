@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +9,7 @@ interface TemplateProps {
 
 export function SwissTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages } = cv;
-  const c = getAccentColor(cv.accentColor || 'blue') || accentColors['red'];
+  const c = getAccentColor(cv.accentColor || 'blue');
   const sp = spacings[cv.spacing || 'normal'];
   const style = getTemplateStyle(cv.fontFamily || 'sans', cv.fontSize || 'medium');
 
@@ -42,13 +43,14 @@ export function SwissTemplate({ cv }: TemplateProps) {
       </div>
 
       {/* Contact bar */}
-      <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-500 mb-6 pb-3" style={{ borderBottomWidth: '2px', borderBottomColor: c.hex, borderBottomStyle: 'solid' }}>
-        {personalInfo.email && <span>{personalInfo.email}</span>}
-        {personalInfo.phone && <span>{personalInfo.phone}</span>}
-        {personalInfo.location && <span>{personalInfo.location}</span>}
-        {personalInfo.linkedin && <span>LinkedIn</span>}
-        {personalInfo.github && <span>GitHub</span>}
-        {personalInfo.website && <span>{personalInfo.website.replace(/^https?:\/\//, '')}</span>}
+      <div className="mb-6 pb-3" style={{ borderBottomWidth: '2px', borderBottomColor: c.hex, borderBottomStyle: 'solid' }}>
+        <TemplateContactList
+          personalInfo={personalInfo}
+          language={cv.language}
+          accentColor={c.hex}
+          className="text-xs text-gray-500"
+          itemClassName="text-xs"
+        />
       </div>
 
       {/* Grid-based content */}
@@ -80,7 +82,7 @@ export function SwissTemplate({ cv }: TemplateProps) {
                       <p className="text-xs" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-3">
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -111,7 +113,7 @@ export function SwissTemplate({ cv }: TemplateProps) {
                     {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
                   </div>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-3">
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </span>
                 </div>
               ))}

@@ -1,8 +1,9 @@
 import { CVData } from '../../types/cv';
-import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
-import { safeFormat } from '../../utils/content-helpers';
+import { Mail, Phone } from 'lucide-react';
+import { formatDateRange, getDisplayUrl, normalizeUrl, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
 import { getTranslation } from '../../utils/localization';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -46,8 +47,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
                       </p>
                     </div>
                     <div className="text-gray-500 text-sm whitespace-nowrap ml-4">
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} -{' '}
-                      {exp.current ? t('present') : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </div>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -88,8 +88,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
                       {edu.description && <p className="text-gray-700 mt-1 text-sm">{edu.description}</p>}
                     </div>
                     <div className="text-gray-500 text-sm whitespace-nowrap ml-4">
-                      {edu.startDate && safeFormat(edu.startDate, 'yyyy')} -{' '}
-                      {edu.current ? t('present') : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                      {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                     </div>
                   </div>
                 </div>
@@ -144,8 +143,8 @@ export function ModernTemplate({ cv }: TemplateProps) {
                     </p>
                   )}
                   {project.url && (
-                    <a href={project.url} className="text-sm mt-1 inline-block hover:underline" style={{ color: c.hex }}>
-                      {project.url.replace(/^https?:\/\//, '')}
+                    <a href={normalizeUrl(project.url)} className="text-sm mt-1 inline-block hover:underline" style={{ color: c.hex }} target="_blank" rel="noreferrer">
+                      {getDisplayUrl(project.url)}
                     </a>
                   )}
                   {project.impact && (
@@ -174,7 +173,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
                     {cert.issuer} • {cert.date && safeFormat(cert.date, 'MMM yyyy')}
                   </p>
                   {cert.url && (
-                    <a href={cert.url} className="text-sm hover:underline" style={{ color: c.hex }}>
+                    <a href={normalizeUrl(cert.url)} className="text-sm hover:underline" style={{ color: c.hex }} target="_blank" rel="noreferrer">
                       View Credential
                     </a>
                   )}
@@ -241,8 +240,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
                       <p className="text-gray-600">{vol.organization}</p>
                     </div>
                     <div className="text-gray-500 text-sm whitespace-nowrap ml-4">
-                      {vol.startDate && safeFormat(vol.startDate, 'MMM yyyy')} -{' '}
-                      {vol.current ? t('present') : vol.endDate && safeFormat(vol.endDate, 'MMM yyyy')}
+                      {formatDateRange(vol.startDate, vol.endDate, vol.current, cv.language, 'MMM yyyy')}
                     </div>
                   </div>
                   <p className="text-gray-700 leading-relaxed mt-1">{vol.description}</p>
@@ -271,7 +269,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
                   <p className="text-gray-600 text-sm">{pub.publisher}</p>
                   {pub.description && <p className="text-gray-700 mt-1">{pub.description}</p>}
                   {pub.url && (
-                    <a href={pub.url} className="text-sm mt-1 inline-block hover:underline" style={{ color: c.hex }}>
+                    <a href={normalizeUrl(pub.url)} className="text-sm mt-1 inline-block hover:underline" style={{ color: c.hex }} target="_blank" rel="noreferrer">
                       View Publication
                     </a>
                   )}
@@ -348,50 +346,14 @@ export function ModernTemplate({ cv }: TemplateProps) {
             {personalInfo.headline && (
               <p className="text-xl mb-3" style={{ color: c.hex }}>{personalInfo.headline}</p>
             )}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-gray-600">
-              {personalInfo.email && (
-                <div className="flex items-center gap-1">
-                  <Mail className="h-3 w-3" />
-                  <span>{personalInfo.email}</span>
-                </div>
-              )}
-              {personalInfo.phone && (
-                <div className="flex items-center gap-1">
-                  <Phone className="h-3 w-3" />
-                  <span>{personalInfo.phone}</span>
-                </div>
-              )}
-              {personalInfo.location && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{personalInfo.location}</span>
-                </div>
-              )}
-              {personalInfo.website && (
-                <div className="flex items-center gap-1">
-                  <Globe className="h-3 w-3" />
-                  <a href={personalInfo.website} className="hover:underline" style={{ color: c.hex }}>
-                    {personalInfo.website.replace(/^https?:\/\//, '')}
-                  </a>
-                </div>
-              )}
-              {personalInfo.linkedin && (
-                <div className="flex items-center gap-1">
-                  <Linkedin className="h-3 w-3" />
-                  <a href={personalInfo.linkedin} className="hover:underline" style={{ color: c.hex }}>
-                    LinkedIn
-                  </a>
-                </div>
-              )}
-              {personalInfo.github && (
-                <div className="flex items-center gap-1">
-                  <Github className="h-3 w-3" />
-                  <a href={personalInfo.github} className="hover:underline" style={{ color: c.hex }}>
-                    GitHub
-                  </a>
-                </div>
-              )}
-            </div>
+            <TemplateContactList
+              personalInfo={personalInfo}
+              language={cv.language}
+              accentColor={c.hex}
+              className="text-gray-600"
+              itemClassName="text-sm"
+              showIcons
+            />
           </div>
         </div>
       </div>

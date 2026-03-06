@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { Achievement } from '../../types/cv';
+import { DatePickerField } from '../date-picker-field';
 
 export function AchievementsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -82,10 +83,9 @@ export function AchievementsEditor() {
               </div>
               <div>
                 <Label>Date</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={item.date}
-                  onChange={(e) => updateAchievement(item.id, 'date', e.target.value)}
+                  onChange={(value) => updateAchievement(item.id, 'date', value)}
                 />
               </div>
             </div>

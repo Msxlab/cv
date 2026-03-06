@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -47,14 +48,16 @@ export function InfographicTemplate({ cv }: TemplateProps) {
         {/* Contact */}
         <div>
           <h2 className="text-xs font-bold uppercase tracking-widest mb-2 text-white/70">Contact</h2>
-          <div className="space-y-1.5 text-xs">
-            {personalInfo.email && <div className="flex items-start gap-2"><span className="text-white/50">@</span><span className="break-all">{personalInfo.email}</span></div>}
-            {personalInfo.phone && <div className="flex items-start gap-2"><span className="text-white/50">#</span><span>{personalInfo.phone}</span></div>}
-            {personalInfo.location && <div className="flex items-start gap-2"><span className="text-white/50">~</span><span>{personalInfo.location}</span></div>}
-            {personalInfo.website && <div className="flex items-start gap-2"><span className="text-white/50">@</span><span className="break-all">{personalInfo.website.replace(/^https?:\/\//, '')}</span></div>}
-            {personalInfo.linkedin && <div className="flex items-start gap-2"><span className="text-white/50">in</span><span>LinkedIn</span></div>}
-            {personalInfo.github && <div className="flex items-start gap-2"><span className="text-white/50">&lt;/&gt;</span><span>GitHub</span></div>}
-          </div>
+          <TemplateContactList
+            personalInfo={personalInfo}
+            language={cv.language}
+            accentColor="#ffffff"
+            layout="stacked"
+            theme="dark"
+            className="space-y-1.5 text-xs"
+            itemClassName="text-xs"
+            showIcons
+          />
         </div>
 
         {/* Skills with progress bars */}
@@ -147,7 +150,7 @@ export function InfographicTemplate({ cv }: TemplateProps) {
                       <p className="text-xs" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-3 px-2 py-0.5 rounded-full" style={{ backgroundColor: c.hex + '10', color: c.hex }}>
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -180,7 +183,7 @@ export function InfographicTemplate({ cv }: TemplateProps) {
                       {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-3">
-                      {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                      {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                     </span>
                   </div>
                 </div>

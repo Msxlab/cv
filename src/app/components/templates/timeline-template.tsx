@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +9,7 @@ interface TemplateProps {
 
 export function TimelineTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages } = cv;
-  const c = getAccentColor(cv.accentColor || 'blue') || accentColors['blue'];
+  const c = getAccentColor(cv.accentColor || 'blue');
   const sp = spacings[cv.spacing || 'normal'];
   const style = getTemplateStyle(cv.fontFamily || 'sans', cv.fontSize || 'medium');
 
@@ -22,12 +23,13 @@ export function TimelineTemplate({ cv }: TemplateProps) {
         <div className="flex-1">
           <h1 className="text-3xl font-bold">{personalInfo.firstName} {personalInfo.lastName}</h1>
           {personalInfo.headline && <p className="text-base mt-1" style={{ color: c.hex }}>{personalInfo.headline}</p>}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-gray-500 text-xs mt-2">
-            {personalInfo.email && <span>{personalInfo.email}</span>}
-            {personalInfo.phone && <span>{personalInfo.phone}</span>}
-            {personalInfo.location && <span>{personalInfo.location}</span>}
-            {personalInfo.website && <span>{personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-          </div>
+          <TemplateContactList
+            personalInfo={personalInfo}
+            language={cv.language}
+            accentColor={c.hex}
+            className="text-gray-500 text-xs mt-2"
+            itemClassName="text-xs"
+          />
         </div>
       </div>
 
@@ -50,7 +52,7 @@ export function TimelineTemplate({ cv }: TemplateProps) {
                   <div className="absolute left-0 top-1 w-3 h-3 rounded-full -ml-[5px] border-2 bg-white" style={{ borderColor: c.hex }} />
                   <div className="absolute left-5 top-2 w-3 h-px" style={{ backgroundColor: c.hex + '40' }} />
                   <div className="text-xs font-medium px-2 py-0.5 rounded-full inline-block mb-1" style={{ backgroundColor: c.hex + '10', color: c.hex }}>
-                    {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                    {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                   </div>
                   <h3 className="font-bold">{exp.position}</h3>
                   <p className="text-xs text-gray-500">{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
@@ -82,7 +84,7 @@ export function TimelineTemplate({ cv }: TemplateProps) {
                 <div key={edu.id} className="relative pl-8">
                   <div className="absolute left-0 top-1 w-3 h-3 rounded-full -ml-[5px] border-2 bg-white" style={{ borderColor: c.hex }} />
                   <div className="text-xs px-2 py-0.5 rounded-full inline-block mb-0.5" style={{ backgroundColor: c.hex + '10', color: c.hex }}>
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </div>
                   <h3 className="font-bold text-sm">{edu.degree}{edu.field ? ` in ${edu.field}` : ''}</h3>
                   <p className="text-xs text-gray-500">{edu.institution}</p>

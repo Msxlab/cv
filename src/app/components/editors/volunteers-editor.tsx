@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Plus, Trash2 } from 'lucide-react';
 import { Volunteer } from '../../types/cv';
+import { DatePickerField } from '../date-picker-field';
 
 export function VolunteersEditor() {
   const { currentCV, updateCV } = useCV();
@@ -105,11 +106,11 @@ export function VolunteersEditor() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Start Date</Label>
-                <Input type="month" value={item.startDate} onChange={(e) => updateVolunteer(item.id, 'startDate', e.target.value)} />
+                <DatePickerField value={item.startDate} onChange={(value) => updateVolunteer(item.id, 'startDate', value)} />
               </div>
               <div>
                 <Label>End Date</Label>
-                <Input type="month" value={item.endDate} onChange={(e) => updateVolunteer(item.id, 'endDate', e.target.value)} disabled={item.current} />
+                <DatePickerField value={item.endDate} onChange={(value) => updateVolunteer(item.id, 'endDate', value)} disabled={item.current} />
               </div>
             </div>
             <div className="flex items-center space-x-2">

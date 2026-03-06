@@ -5,7 +5,7 @@ import { Switch } from './ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Language, AccentColor, FontSize, Spacing, TemplateName } from '../types/cv';
-import { accentColorOptions, templateOptions, fontFamilies, fontSizes, spacings, loadGoogleFont } from '../utils/template-styles';
+import { accentColorOptions, templateOptions, fontFamilies, fontSizes, spacings, loadGoogleFont, templateSupportsDoubleLayout } from '../utils/template-styles';
 import { Check, Palette, Type, Maximize2, LayoutGrid } from 'lucide-react';
 import { useState } from 'react';
 
@@ -16,6 +16,15 @@ export function SettingsPanel() {
   );
 
   if (!currentCV) return null;
+
+  const supportsDoubleLayout = templateSupportsDoubleLayout(currentCV.template);
+
+  const handleTemplateChange = (template: TemplateName) => {
+    updateCV({
+      template,
+      layout: templateSupportsDoubleLayout(template) ? currentCV.layout : 'single',
+    });
+  };
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -38,7 +47,7 @@ export function SettingsPanel() {
             {templateOptions.map((tmpl) => (
               <button
                 key={tmpl.value}
-                onClick={() => updateCV({ template: tmpl.value as TemplateName })}
+                onClick={() => handleTemplateChange(tmpl.value)}
                 className={`relative text-left p-3 rounded-lg border-2 transition-all hover:shadow-md ${
                   currentCV.template === tmpl.value
                     ? 'border-blue-500 bg-blue-50 shadow-md'
@@ -52,6 +61,9 @@ export function SettingsPanel() {
                 )}
                 <p className="font-semibold text-sm">{tmpl.label}</p>
                 <p className="text-xs text-gray-500 mt-1">{tmpl.description}</p>
+                <p className="text-[11px] text-gray-400 mt-2">
+                  {tmpl.supportsDoubleLayout ? 'Single or two-column' : 'Built-in fixed layout'}
+                </p>
               </button>
             ))}
           </div>
@@ -88,7 +100,10 @@ export function SettingsPanel() {
               {accentColorOptions.map((color) => (
                 <button
                   key={color.value}
-                  onClick={() => updateCV({ accentColor: color.value as AccentColor })}
+                  onClick={() => {
+                    setCustomColor(color.swatch);
+                    updateCV({ accentColor: color.value as AccentColor });
+                  }}
                   className={`group relative flex flex-col items-center gap-1`}
                   title={color.label}
                 >
@@ -217,17 +232,22 @@ export function SettingsPanel() {
           <div>
             <Label>Layout</Label>
             <Select
-              value={currentCV.layout}
-              onValueChange={(value) => updateCV({ layout: value as any })}
+              value={supportsDoubleLayout ? currentCV.layout : 'single'}
+              onValueChange={(value) => updateCV({ layout: value as 'single' | 'double' })}
             >
-              <SelectTrigger>
+              <SelectTrigger disabled={!supportsDoubleLayout}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="single">Single Column</SelectItem>
-                <SelectItem value="double">Two Columns</SelectItem>
+                {supportsDoubleLayout && <SelectItem value="double">Two Columns</SelectItem>}
               </SelectContent>
             </Select>
+            <p className="text-sm text-gray-500 mt-2">
+              {supportsDoubleLayout
+                ? 'This template supports both single and two-column layouts.'
+                : 'This template uses its own fixed structure. Switch to Modern, Classic, or Executive for a two-column option.'}
+            </p>
           </div>
 
           <div className="flex items-center justify-between">

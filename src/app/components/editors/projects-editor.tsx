@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2, X } from 'lucide-react';
 import { Project } from '../../types/cv';
+import { DatePickerField } from '../date-picker-field';
 
 export function ProjectsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -185,18 +186,16 @@ export function ProjectsEditor() {
               </div>
               <div>
                 <Label>Start Date</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={project.startDate}
-                  onChange={(e) => updateProject(project.id, 'startDate', e.target.value)}
+                  onChange={(value) => updateProject(project.id, 'startDate', value)}
                 />
               </div>
               <div>
                 <Label>End Date</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={project.endDate}
-                  onChange={(e) => updateProject(project.id, 'endDate', e.target.value)}
+                  onChange={(value) => updateProject(project.id, 'endDate', value)}
                 />
               </div>
             </div>

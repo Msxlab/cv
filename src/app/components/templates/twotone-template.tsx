@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -38,44 +39,15 @@ export function TwoToneTemplate({ cv }: TemplateProps) {
         {/* Contact */}
         <div>
           <h2 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: c.hex }}>Contact</h2>
-          <div className="space-y-2 text-xs">
-            {personalInfo.email && (
-              <div>
-                <p className="text-white/40 text-xs">Email</p>
-                <p className="break-all">{personalInfo.email}</p>
-              </div>
-            )}
-            {personalInfo.phone && (
-              <div>
-                <p className="text-white/40 text-xs">Phone</p>
-                <p>{personalInfo.phone}</p>
-              </div>
-            )}
-            {personalInfo.location && (
-              <div>
-                <p className="text-white/40 text-xs">Location</p>
-                <p>{personalInfo.location}</p>
-              </div>
-            )}
-            {personalInfo.linkedin && (
-              <div>
-                <p className="text-white/40 text-xs">LinkedIn</p>
-                <p className="break-all">{personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '')}</p>
-              </div>
-            )}
-            {personalInfo.github && (
-              <div>
-                <p className="text-white/40 text-xs">GitHub</p>
-                <p className="break-all">{personalInfo.github.replace(/^https?:\/\/(www\.)?github\.com\//, '')}</p>
-              </div>
-            )}
-            {personalInfo.website && (
-              <div>
-                <p className="text-white/40 text-xs">Website</p>
-                <p className="break-all">{personalInfo.website.replace(/^https?:\/\//, '')}</p>
-              </div>
-            )}
-          </div>
+          <TemplateContactList
+            personalInfo={personalInfo}
+            language={cv.language}
+            accentColor={c.hex}
+            layout="stacked"
+            theme="dark"
+            className="space-y-2 text-xs"
+            itemClassName="text-xs"
+          />
         </div>
 
         {/* Divider */}
@@ -167,7 +139,7 @@ export function TwoToneTemplate({ cv }: TemplateProps) {
                       <p className="text-sm font-medium" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-3 px-2 py-0.5 rounded" style={{ backgroundColor: c.hex + '10' }}>
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -211,7 +183,7 @@ export function TwoToneTemplate({ cv }: TemplateProps) {
                     {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
                   </div>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-3">
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </span>
                 </div>
               ))}

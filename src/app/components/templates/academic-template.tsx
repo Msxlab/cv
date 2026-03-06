@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, getDisplayUrl, normalizeUrl, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -21,12 +22,14 @@ export function AcademicTemplate({ cv }: TemplateProps) {
         )}
         <h1 className="text-3xl font-bold">{personalInfo.firstName} {personalInfo.lastName}</h1>
         {personalInfo.headline && <p className="text-base mt-1" style={{ color: c.hex }}>{personalInfo.headline}</p>}
-        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-gray-500 text-xs mt-2">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>· {personalInfo.phone}</span>}
-          {personalInfo.location && <span>· {personalInfo.location}</span>}
-          {personalInfo.website && <span>· {personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-        </div>
+        <TemplateContactList
+          personalInfo={personalInfo}
+          language={cv.language}
+          accentColor={c.hex}
+          className="justify-center text-gray-500 text-xs mt-2"
+          itemClassName="text-xs"
+          separator="·"
+        />
         <div className="mt-3 h-0.5" style={{ backgroundColor: c.hex }} />
       </div>
 
@@ -53,7 +56,7 @@ export function AcademicTemplate({ cv }: TemplateProps) {
                     {edu.description && <p className="text-gray-600 text-xs mt-1">{edu.description}</p>}
                   </div>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </span>
                 </div>
               </div>
@@ -70,7 +73,7 @@ export function AcademicTemplate({ cv }: TemplateProps) {
             {publications.map(pub => (
               <li key={pub.id} className="text-gray-700 text-xs">
                 <span className="font-semibold">{pub.title}</span>. {pub.publisher}.{pub.date ? ` (${safeFormat(pub.date, 'yyyy')})` : ''}
-                {pub.url && <span className="ml-1" style={{ color: c.hex }}>[Link]</span>}
+                {pub.url && <a className="ml-1 hover:underline" style={{ color: c.hex }} href={normalizeUrl(pub.url)} target="_blank" rel="noreferrer">[{getDisplayUrl(pub.url) || 'Link'}]</a>}
               </li>
             ))}
           </ol>
@@ -90,7 +93,7 @@ export function AcademicTemplate({ cv }: TemplateProps) {
                     <p className="text-gray-600 text-sm">{exp.company}{exp.location ? `, ${exp.location}` : ''}</p>
                   </div>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
-                    {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                    {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                   </span>
                 </div>
                 {exp.responsibilities.length > 0 && (

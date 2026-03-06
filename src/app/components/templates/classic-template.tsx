@@ -1,7 +1,8 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, getDisplayUrl, normalizeUrl, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
 import { getTranslation } from '../../utils/localization';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -45,8 +46,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
                       <p className="italic text-gray-700">{exp.company}{exp.location ? `, ${exp.location}` : ''}</p>
                     </div>
                     <p className="text-gray-600 text-xs whitespace-nowrap ml-4">
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} –{' '}
-                      {exp.current ? t('present') : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </p>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -83,8 +83,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
                     {edu.description && <p className="text-gray-800 mt-1 text-sm">{edu.description}</p>}
                   </div>
                   <p className="text-gray-600 text-xs whitespace-nowrap ml-4">
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} –{' '}
-                    {edu.current ? t('present') : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </p>
                 </div>
               ))}
@@ -130,7 +129,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
                 <div key={project.id} className="break-inside-avoid">
                   <div className="flex justify-between items-start">
                     <p className="font-bold">{project.name}{project.role ? ` — ${project.role}` : ''}</p>
-                    {project.url && <a href={project.url} className="text-xs text-blue-600 hover:underline">{project.url.replace(/^https?:\/\//, '')}</a>}
+                    {project.url && <a href={normalizeUrl(project.url)} className="text-xs text-blue-600 hover:underline" target="_blank" rel="noreferrer">{getDisplayUrl(project.url)}</a>}
                   </div>
                   <p className="text-gray-800">{project.description}</p>
                   {project.technologies.length > 0 && (
@@ -221,8 +220,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
                       <p className="italic text-gray-700">{vol.organization}</p>
                     </div>
                     <p className="text-gray-600 text-xs whitespace-nowrap ml-4">
-                      {vol.startDate && safeFormat(vol.startDate, 'MMM yyyy')} –{' '}
-                      {vol.current ? t('present') : vol.endDate && safeFormat(vol.endDate, 'MMM yyyy')}
+                      {formatDateRange(vol.startDate, vol.endDate, vol.current, cv.language, 'MMM yyyy')}
                     </p>
                   </div>
                   <p className="text-gray-800 leading-relaxed mt-1 text-sm">{vol.description}</p>
@@ -311,14 +309,14 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         {personalInfo.headline && (
           <p className="text-base text-gray-600 mb-2 italic">{personalInfo.headline}</p>
         )}
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-gray-600 text-xs">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>• {personalInfo.phone}</span>}
-          {personalInfo.location && <span>• {personalInfo.location}</span>}
-          {personalInfo.linkedin && <span>• LinkedIn</span>}
-          {personalInfo.github && <span>• GitHub</span>}
-          {personalInfo.website && <span>• {personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-        </div>
+        <TemplateContactList
+          personalInfo={personalInfo}
+          language={cv.language}
+          accentColor={c.hex}
+          className="justify-center text-gray-600 text-xs"
+          itemClassName="text-xs"
+          separator="•"
+        />
       </div>
 
       <hr className="border-t-2 mb-6" style={{ borderColor: c.hex }} />

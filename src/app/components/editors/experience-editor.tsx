@@ -8,6 +8,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Plus, Trash2 } from 'lucide-react';
 import { Experience } from '../../types/cv';
 import { QuickTips } from '../quick-tips';
+import { DatePickerField } from '../date-picker-field';
 
 export function ExperienceEditor() {
   const { currentCV, updateCV } = useCV();
@@ -141,18 +142,16 @@ export function ExperienceEditor() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Start Date</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={exp.startDate}
-                  onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
+                  onChange={(value) => updateExperience(exp.id, 'startDate', value)}
                 />
               </div>
               <div>
                 <Label>End Date</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={exp.endDate}
-                  onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
+                  onChange={(value) => updateExperience(exp.id, 'endDate', value)}
                   disabled={exp.current}
                 />
               </div>

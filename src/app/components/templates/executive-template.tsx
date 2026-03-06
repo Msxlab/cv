@@ -1,7 +1,8 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, getDisplayUrl, normalizeUrl, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
 import { getTranslation } from '../../utils/localization';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -48,7 +49,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                       <p className="text-slate-600 font-medium">{exp.company}{exp.location ? ` • ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-white bg-slate-700 px-3 py-1 rounded-full whitespace-nowrap ml-4">
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? t('present') : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -92,7 +93,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                   {edu.field && <p className="text-slate-700 text-xs">{edu.field}</p>}
                   <p className="text-slate-500 text-xs">{edu.institution}</p>
                   <p className="text-xs font-medium mt-1" style={{ color: c.hex }}>
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? t('present') : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </p>
                   {edu.gpa && <p className="text-slate-500 text-xs mt-0.5">GPA: {edu.gpa}</p>}
                   {edu.description && <p className="text-slate-700 text-xs mt-1">{edu.description}</p>}
@@ -155,7 +156,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                     </div>
                   )}
                   {project.url && (
-                    <a href={project.url} className="text-xs mt-1 inline-block hover:underline" style={{ color: c.hex }}>{project.url.replace(/^https?:\/\//, '')}</a>
+                    <a href={normalizeUrl(project.url)} className="text-xs mt-1 inline-block hover:underline" style={{ color: c.hex }} target="_blank" rel="noreferrer">{getDisplayUrl(project.url)}</a>
                   )}
                 </div>
               ))}
@@ -244,7 +245,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                       <p className="text-slate-600 text-xs font-medium">{vol.organization}</p>
                     </div>
                     <span className="text-xs text-slate-500">
-                      {vol.startDate && safeFormat(vol.startDate, 'MMM yyyy')} – {vol.current ? t('present') : vol.endDate && safeFormat(vol.endDate, 'MMM yyyy')}
+                      {formatDateRange(vol.startDate, vol.endDate, vol.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   <p className="text-slate-700 text-xs mt-1">{vol.description}</p>
@@ -339,14 +340,14 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                 {personalInfo.headline}
               </p>
             )}
-            <div className="flex flex-wrap gap-x-6 gap-y-1 text-slate-300 text-xs">
-              {personalInfo.email && <span className="flex items-center gap-1">✉ {personalInfo.email}</span>}
-              {personalInfo.phone && <span className="flex items-center gap-1">✆ {personalInfo.phone}</span>}
-              {personalInfo.location && <span className="flex items-center gap-1">⊙ {personalInfo.location}</span>}
-              {personalInfo.linkedin && <span className="flex items-center gap-1">in LinkedIn</span>}
-              {personalInfo.github && <span className="flex items-center gap-1">⊞ GitHub</span>}
-              {personalInfo.website && <span className="flex items-center gap-1">⌂ {personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-            </div>
+            <TemplateContactList
+              personalInfo={personalInfo}
+              language={cv.language}
+              accentColor={c.hex}
+              theme="dark"
+              className="text-slate-300 text-xs"
+              itemClassName="text-xs"
+            />
           </div>
         </div>
       </div>

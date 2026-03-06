@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { Publication } from '../../types/cv';
+import { DatePickerField } from '../date-picker-field';
 
 export function PublicationsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -90,10 +91,9 @@ export function PublicationsEditor() {
               </div>
               <div>
                 <Label>Publication Date</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={item.date}
-                  onChange={(e) => updatePublication(item.id, 'date', e.target.value)}
+                  onChange={(value) => updatePublication(item.id, 'date', value)}
                 />
               </div>
             </div>

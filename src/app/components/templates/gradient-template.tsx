@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +9,7 @@ interface TemplateProps {
 
 export function GradientTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages } = cv;
-  const c = getAccentColor(cv.accentColor || 'blue') || accentColors['indigo'];
+  const c = getAccentColor(cv.accentColor || 'blue');
   const sp = spacings[cv.spacing || 'normal'];
   const style = getTemplateStyle(cv.fontFamily || 'sans', cv.fontSize || 'medium');
 
@@ -23,14 +24,14 @@ export function GradientTemplate({ cv }: TemplateProps) {
           <div className="flex-1">
             <h1 className="text-4xl font-bold">{personalInfo.firstName} {personalInfo.lastName}</h1>
             {personalInfo.headline && <p className="text-lg text-white/80 mt-1">{personalInfo.headline}</p>}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-white/60 text-xs mt-3">
-              {personalInfo.email && <span>{personalInfo.email}</span>}
-              {personalInfo.phone && <span>{personalInfo.phone}</span>}
-              {personalInfo.location && <span>{personalInfo.location}</span>}
-              {personalInfo.linkedin && <span>LinkedIn</span>}
-              {personalInfo.github && <span>GitHub</span>}
-              {personalInfo.website && <span>{personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-            </div>
+            <TemplateContactList
+              personalInfo={personalInfo}
+              language={cv.language}
+              accentColor="#ffffff"
+              theme="dark"
+              className="text-white/60 text-xs mt-3"
+              itemClassName="text-xs"
+            />
           </div>
         </div>
       </div>
@@ -63,7 +64,7 @@ export function GradientTemplate({ cv }: TemplateProps) {
                       <p className="text-sm" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-white px-3 py-1 rounded-full whitespace-nowrap" style={{ background: `linear-gradient(90deg, ${c.hex}, ${c.hex}aa)` }}>
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -99,7 +100,7 @@ export function GradientTemplate({ cv }: TemplateProps) {
                       {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
                     </div>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-3">
-                      {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                      {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                     </span>
                   </div>
                 </div>

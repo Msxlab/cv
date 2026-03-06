@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { Certification } from '../../types/cv';
+import { DatePickerField } from '../date-picker-field';
 
 export function CertificationsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -97,18 +98,16 @@ export function CertificationsEditor() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label>Issue Date</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={cert.date}
-                  onChange={(e) => updateCertification(cert.id, 'date', e.target.value)}
+                  onChange={(value) => updateCertification(cert.id, 'date', value)}
                 />
               </div>
               <div>
                 <Label>Expiry Date (optional)</Label>
-                <Input
-                  type="month"
+                <DatePickerField
                   value={cert.expiryDate || ''}
-                  onChange={(e) => updateCertification(cert.id, 'expiryDate', e.target.value)}
+                  onChange={(value) => updateCertification(cert.id, 'expiryDate', value)}
                 />
               </div>
               <div>

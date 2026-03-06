@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -25,13 +26,14 @@ export function ElegantTemplate({ cv }: TemplateProps) {
         {personalInfo.headline && (
           <p className="text-sm mt-2 italic" style={{ color: c.hex }}>{personalInfo.headline}</p>
         )}
-        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-gray-500 text-xs mt-3">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>|</span>}
-          {personalInfo.phone && <span>{personalInfo.phone}</span>}
-          {personalInfo.location && <span>|</span>}
-          {personalInfo.location && <span>{personalInfo.location}</span>}
-        </div>
+        <TemplateContactList
+          personalInfo={personalInfo}
+          language={cv.language}
+          accentColor={c.hex}
+          className="justify-center text-gray-500 text-xs mt-3"
+          itemClassName="text-xs"
+          separator="|"
+        />
         <div className="flex items-center gap-2 justify-center mt-3">
           <div className="flex-1 h-px" style={{ backgroundColor: c.hex + '40' }} />
           <div className="w-2 h-2 rotate-45" style={{ backgroundColor: c.hex }} />
@@ -63,7 +65,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                     <p className="text-xs italic" style={{ color: c.hex }}>{exp.company}{exp.location ? `, ${exp.location}` : ''}</p>
                   </div>
                   <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
-                    {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                    {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                   </span>
                 </div>
                 {exp.responsibilities.length > 0 && (
@@ -103,7 +105,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                   {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
                 </div>
                 <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
-                  {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                  {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                 </span>
               </div>
             ))}

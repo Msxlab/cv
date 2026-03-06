@@ -1,4 +1,4 @@
-import { AccentColor, FontSize, Spacing } from '../types/cv';
+import { AccentColor, FontSize, Spacing, TemplateName } from '../types/cv';
 
 // ==================== ACCENT COLORS (26 total) ====================
 type ColorDef = { hex: string; hexLight: string };
@@ -126,23 +126,27 @@ export function getTemplateStyle(fontFamily: string, fontSize: FontSize) {
   };
 }
 
+export const templatesWithDoubleLayout = new Set<TemplateName>(['classic', 'modern', 'executive']);
+
+export const templateSupportsDoubleLayout = (template: TemplateName) => templatesWithDoubleLayout.has(template);
+
 // Template info for the template picker
-export const templateOptions: { value: string; label: string; description: string }[] = [
-  { value: 'modern', label: 'Modern', description: 'Clean and contemporary' },
-  { value: 'classic', label: 'Classic', description: 'Traditional professional layout' },
-  { value: 'executive', label: 'Executive', description: 'Dark header for senior roles' },
-  { value: 'technical', label: 'Technical', description: 'Sidebar layout for developers' },
-  { value: 'creative', label: 'Creative', description: 'Colorful gradient header' },
-  { value: 'minimalist', label: 'Minimalist', description: 'Ultra-clean whitespace' },
-  { value: 'elegant', label: 'Elegant', description: 'Refined typography' },
-  { value: 'compact', label: 'Compact', description: 'Dense single-page layout' },
-  { value: 'academic', label: 'Academic', description: 'Scholarly design' },
-  { value: 'infographic', label: 'Infographic', description: 'Visual skill bars' },
-  { value: 'bold', label: 'Bold', description: 'Eye-catching oversized header' },
-  { value: 'twotone', label: 'Two-Tone', description: 'Dark/light split sidebar' },
-  { value: 'timeline', label: 'Timeline', description: 'Vertical timeline layout' },
-  { value: 'metro', label: 'Metro', description: 'Tile-based modern metro' },
-  { value: 'newspaper', label: 'Newspaper', description: 'Multi-column press style' },
-  { value: 'gradient', label: 'Gradient', description: 'Smooth gradient backgrounds' },
-  { value: 'swiss', label: 'Swiss', description: 'Grid-based Swiss design' },
+export const templateOptions: { value: TemplateName; label: string; description: string; supportsDoubleLayout: boolean }[] = [
+  { value: 'modern', label: 'Modern', description: 'Clean and contemporary', supportsDoubleLayout: true },
+  { value: 'classic', label: 'Classic', description: 'Traditional professional layout', supportsDoubleLayout: true },
+  { value: 'executive', label: 'Executive', description: 'Dark header for senior roles', supportsDoubleLayout: true },
+  { value: 'technical', label: 'Technical', description: 'Sidebar layout for developers', supportsDoubleLayout: false },
+  { value: 'creative', label: 'Creative', description: 'Colorful gradient header', supportsDoubleLayout: false },
+  { value: 'minimalist', label: 'Minimalist', description: 'Ultra-clean whitespace', supportsDoubleLayout: false },
+  { value: 'elegant', label: 'Elegant', description: 'Refined typography', supportsDoubleLayout: false },
+  { value: 'compact', label: 'Compact', description: 'Dense single-page layout', supportsDoubleLayout: false },
+  { value: 'academic', label: 'Academic', description: 'Scholarly design', supportsDoubleLayout: false },
+  { value: 'infographic', label: 'Infographic', description: 'Visual skill bars', supportsDoubleLayout: false },
+  { value: 'bold', label: 'Bold', description: 'Eye-catching oversized header', supportsDoubleLayout: false },
+  { value: 'twotone', label: 'Two-Tone', description: 'Dark/light split sidebar', supportsDoubleLayout: false },
+  { value: 'timeline', label: 'Timeline', description: 'Vertical timeline layout', supportsDoubleLayout: false },
+  { value: 'metro', label: 'Metro', description: 'Tile-based modern metro', supportsDoubleLayout: false },
+  { value: 'newspaper', label: 'Newspaper', description: 'Multi-column press style', supportsDoubleLayout: false },
+  { value: 'gradient', label: 'Gradient', description: 'Smooth gradient backgrounds', supportsDoubleLayout: false },
+  { value: 'swiss', label: 'Swiss', description: 'Grid-based Swiss design', supportsDoubleLayout: false },
 ];

@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, getDisplayUrl, normalizeUrl, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -43,44 +44,15 @@ export function TechnicalTemplate({ cv }: TemplateProps) {
           <h2 className="text-xs font-bold uppercase tracking-widest text-white/70 mb-2 pb-1 border-b border-white/20">
             Contact
           </h2>
-          <div className="space-y-1 text-xs text-white/90">
-            {personalInfo.email && (
-              <div className="break-all">
-                <span className="text-white/50 block text-xs">Email</span>
-                {personalInfo.email}
-              </div>
-            )}
-            {personalInfo.phone && (
-              <div>
-                <span className="text-white/50 block text-xs">Phone</span>
-                {personalInfo.phone}
-              </div>
-            )}
-            {personalInfo.location && (
-              <div>
-                <span className="text-white/50 block text-xs">Location</span>
-                {personalInfo.location}
-              </div>
-            )}
-            {personalInfo.github && (
-              <div>
-                <span className="text-white/50 block text-xs">GitHub</span>
-                <span className="break-all">{personalInfo.github.replace(/^https?:\/\/(www\.)?github\.com\//, '')}</span>
-              </div>
-            )}
-            {personalInfo.linkedin && (
-              <div>
-                <span className="text-white/50 block text-xs">LinkedIn</span>
-                <span className="break-all">{personalInfo.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '')}</span>
-              </div>
-            )}
-            {personalInfo.website && (
-              <div>
-                <span className="text-white/50 block text-xs">Website</span>
-                <span className="break-all">{personalInfo.website.replace(/^https?:\/\//, '')}</span>
-              </div>
-            )}
-          </div>
+          <TemplateContactList
+            personalInfo={personalInfo}
+            language={cv.language}
+            accentColor={c.hex}
+            layout="stacked"
+            theme="dark"
+            className="space-y-1"
+            itemClassName="text-xs"
+          />
         </div>
 
         {/* Skills */}
@@ -175,7 +147,7 @@ export function TechnicalTemplate({ cv }: TemplateProps) {
                       <p className="font-medium text-xs" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-gray-500 whitespace-nowrap ml-3 font-mono bg-gray-100 px-2 py-0.5 rounded">
-                      {exp.startDate && safeFormat(exp.startDate, 'MM/yyyy')} – {exp.current ? 'now' : exp.endDate && safeFormat(exp.endDate, 'MM/yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MM/yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -205,12 +177,15 @@ export function TechnicalTemplate({ cv }: TemplateProps) {
                 <div key={project.id} className="border-l-2 pl-3" style={{ borderColor: c.hex + '60' }}>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-gray-900 text-xs">{project.name}</h3>
-                    {project.url && (
-                      <span className="text-xs font-mono" style={{ color: c.hex }}>↗</span>
-                    )}
+                    {project.url && <span className="text-xs font-mono" style={{ color: c.hex }}>↗</span>}
                   </div>
                   {project.role && <p className="text-xs" style={{ color: c.hex }}>{project.role}</p>}
                   <p className="text-gray-700 text-xs mt-0.5">{project.description}</p>
+                  {project.url && (
+                    <a href={normalizeUrl(project.url)} className="text-xs font-mono mt-1 inline-block hover:underline" style={{ color: c.hex }} target="_blank" rel="noreferrer">
+                      {getDisplayUrl(project.url)}
+                    </a>
+                  )}
                   {project.technologies.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {project.technologies.map((tech, idx) => (
@@ -240,7 +215,7 @@ export function TechnicalTemplate({ cv }: TemplateProps) {
                     {edu.gpa && <p className="text-gray-500 text-xs">GPA: {edu.gpa}</p>}
                   </div>
                   <span className="text-xs text-gray-500 whitespace-nowrap ml-3 font-mono">
-                    {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'now' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                    {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                   </span>
                 </div>
               ))}

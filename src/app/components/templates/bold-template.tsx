@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -33,12 +34,14 @@ export function BoldTemplate({ cv }: TemplateProps) {
           </div>
         </div>
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-white/70 text-xs mt-4">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>{personalInfo.phone}</span>}
-          {personalInfo.location && <span>{personalInfo.location}</span>}
-          {personalInfo.linkedin && <span>LinkedIn</span>}
-          {personalInfo.github && <span>GitHub</span>}
-          {personalInfo.website && <span>{personalInfo.website.replace(/^https?:\/\//, '')}</span>}
+          <TemplateContactList
+            personalInfo={personalInfo}
+            language={cv.language}
+            accentColor="#ffffff"
+            theme="dark"
+            className="text-white/70 text-xs"
+            itemClassName="text-xs"
+          />
         </div>
       </div>
 
@@ -65,7 +68,7 @@ export function BoldTemplate({ cv }: TemplateProps) {
                       <p className="text-sm font-medium" style={{ color: c.hex }}>{exp.company}{exp.location ? ` · ${exp.location}` : ''}</p>
                     </div>
                     <span className="text-xs text-white font-bold px-3 py-1 rounded-full whitespace-nowrap ml-4" style={{ backgroundColor: c.hex }}>
-                      {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                     </span>
                   </div>
                   {exp.responsibilities.length > 0 && (
@@ -105,7 +108,7 @@ export function BoldTemplate({ cv }: TemplateProps) {
                     <h3 className="font-bold text-sm">{edu.degree}{edu.field ? ` in ${edu.field}` : ''}</h3>
                     <p className="text-xs" style={{ color: c.hex }}>{edu.institution}</p>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                      {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                     </p>
                     {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
                   </div>

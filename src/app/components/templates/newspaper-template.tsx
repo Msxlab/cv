@@ -1,6 +1,7 @@
 import { CVData } from '../../types/cv';
-import { safeFormat } from '../../utils/content-helpers';
+import { formatDateRange, safeFormat } from '../../utils/content-helpers';
 import { getAccentColor, getTemplateStyle, spacings } from '../../utils/template-styles';
+import { TemplateContactList } from './template-contact-list';
 
 interface TemplateProps {
   cv: CVData;
@@ -8,7 +9,7 @@ interface TemplateProps {
 
 export function NewspaperTemplate({ cv }: TemplateProps) {
   const { personalInfo, experiences, education, skills, projects, certifications, languages } = cv;
-  const c = getAccentColor(cv.accentColor || 'blue') || accentColors['slate'];
+  const c = getAccentColor(cv.accentColor || 'blue');
   const sp = spacings[cv.spacing || 'normal'];
   const style = getTemplateStyle(cv.fontFamily || 'serif', cv.fontSize || 'medium');
 
@@ -31,14 +32,14 @@ export function NewspaperTemplate({ cv }: TemplateProps) {
           </div>
         </div>
         <div className="h-0.5 bg-black mt-2 mb-1" />
-        <div className="flex flex-wrap justify-center gap-x-3 text-xs text-gray-500 mb-1">
-          {personalInfo.email && <span>{personalInfo.email}</span>}
-          {personalInfo.phone && <span>| {personalInfo.phone}</span>}
-          {personalInfo.location && <span>| {personalInfo.location}</span>}
-          {personalInfo.website && <span>| {personalInfo.website.replace(/^https?:\/\//, '')}</span>}
-          {personalInfo.linkedin && <span>| LinkedIn</span>}
-          {personalInfo.github && <span>| GitHub</span>}
-        </div>
+        <TemplateContactList
+          personalInfo={personalInfo}
+          language={cv.language}
+          accentColor={c.hex}
+          className="justify-center text-xs text-gray-500 mb-1"
+          itemClassName="text-xs"
+          separator="|"
+        />
         <div className="h-px bg-gray-300" />
       </div>
 
@@ -65,7 +66,7 @@ export function NewspaperTemplate({ cv }: TemplateProps) {
                   <h3 className="font-bold text-sm">{exp.position}</h3>
                   <p className="text-xs italic" style={{ color: c.hex }}>{exp.company}{exp.location ? `, ${exp.location}` : ''}</p>
                   <p className="text-xs text-gray-400">
-                    {exp.startDate && safeFormat(exp.startDate, 'MMM yyyy')} – {exp.current ? 'Present' : exp.endDate && safeFormat(exp.endDate, 'MMM yyyy')}
+                    {formatDateRange(exp.startDate, exp.endDate, exp.current, cv.language, 'MMM yyyy')}
                   </p>
                   {exp.responsibilities.length > 0 && (
                     <ul className="mt-1 space-y-0.5">
@@ -91,7 +92,7 @@ export function NewspaperTemplate({ cv }: TemplateProps) {
                 <h3 className="font-bold text-xs">{edu.degree}{edu.field ? ` in ${edu.field}` : ''}</h3>
                 <p className="text-xs italic" style={{ color: c.hex }}>{edu.institution}</p>
                 <p className="text-xs text-gray-400">
-                  {edu.startDate && safeFormat(edu.startDate, 'yyyy')} – {edu.current ? 'Present' : edu.endDate && safeFormat(edu.endDate, 'yyyy')}
+                  {formatDateRange(edu.startDate, edu.endDate, edu.current, cv.language, 'yyyy')}
                 </p>
                 {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
               </div>
