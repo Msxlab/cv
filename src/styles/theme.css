@@ -179,3 +179,38 @@
     line-height: 1.5;
   }
 }
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  #cv-preview,
+  #cv-export-preview {
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  .cv-template {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    color-adjust: exact;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .break-inside-avoid,
+  .cv-section,
+  .cv-item,
+  section,
+  article {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -8,6 +8,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Plus, Trash2 } from 'lucide-react';
 import { Volunteer } from '../../types/cv';
 import { DatePickerField } from '../date-picker-field';
+import { createId } from '../../utils/cv-schema';
 
 export function VolunteersEditor() {
   const { currentCV, updateCV } = useCV();
@@ -18,7 +19,7 @@ export function VolunteersEditor() {
 
   const addVolunteer = () => {
     const newItem: Volunteer = {
-      id: Date.now().toString(),
+      id: createId(),
       organization: '',
       role: '',
       description: '',
@@ -36,7 +37,9 @@ export function VolunteersEditor() {
   const updateVolunteer = (id: string, field: keyof Volunteer, value: any) => {
     updateCV({
       volunteers: volunteers.map(v =>
-        v.id === id ? { ...v, [field]: value } : v
+        v.id === id
+          ? { ...v, [field]: value, ...(field === 'current' && value ? { endDate: '' } : {}) }
+          : v
       ),
     });
   };
@@ -117,7 +120,7 @@ export function VolunteersEditor() {
               <Checkbox
                 id={`current-vol-${item.id}`}
                 checked={item.current}
-                onCheckedChange={(checked) => updateVolunteer(item.id, 'current', checked)}
+                onCheckedChange={(checked) => updateVolunteer(item.id, 'current', Boolean(checked))}
               />
               <label htmlFor={`current-vol-${item.id}`} className="text-sm">Currently volunteering here</label>
             </div>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { Publication } from '../../types/cv';
 import { DatePickerField } from '../date-picker-field';
+import { createId } from '../../utils/cv-schema';
 
 export function PublicationsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -16,7 +17,7 @@ export function PublicationsEditor() {
 
   const addPublication = () => {
     const newItem: Publication = {
-      id: Date.now().toString(),
+      id: createId(),
       title: '',
       publisher: '',
       date: '',
@@ -103,6 +104,14 @@ export function PublicationsEditor() {
                 value={item.url || ''}
                 onChange={(e) => updatePublication(item.id, 'url', e.target.value)}
                 placeholder="https://doi.org/..."
+              />
+            </div>
+            <div>
+              <Label>Description (optional)</Label>
+              <Input
+                value={item.description || ''}
+                onChange={(e) => updatePublication(item.id, 'description', e.target.value)}
+                placeholder="Short note, conference, DOI context, or article type"
               />
             </div>
           </CardContent>

@@ -38,7 +38,6 @@ export interface Experience {
   current: boolean;
   responsibilities: string[];
   achievements: string[];
-  metrics: string[];
 }
 
 export interface Education {
@@ -134,6 +133,7 @@ export interface CustomSection {
 export interface CVData {
   id: string;
   name: string;
+  schemaVersion: number;
   language: Language;
   template: TemplateName;
   layout: 'single' | 'double';
@@ -159,25 +159,3 @@ export interface CVData {
   updatedAt: string;
 }
 
-export interface JobDescription {
-  title: string;
-  company: string;
-  description: string;
-  requirements: string[];
-  keywords: string[];
-}
-
-export interface ATSAnalysis {
-  score: number;
-  missingKeywords: string[];
-  suggestions: string[];
-  warnings: string[];
-  strengths: string[];
-}
-
-export interface ContentSuggestion {
-  type: 'improvement' | 'warning' | 'info';
-  section: string;
-  message: string;
-  suggestion?: string;
-}

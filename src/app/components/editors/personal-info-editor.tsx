@@ -6,8 +6,30 @@ import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Upload, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { PhotoCropDialog } from '../photo-crop-dialog';
 import { QuickTips } from '../quick-tips';
+
+const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
+const MAX_PHOTO_DIMENSION = 4096;
+
+function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: image.naturalWidth, height: image.naturalHeight });
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Unable to read image dimensions.'));
+    };
+    image.src = url;
+  });
+}
 
 export function PersonalInfoEditor() {
   const { currentCV, updateCV } = useCV();
@@ -27,9 +49,34 @@ export function PersonalInfoEditor() {
     });
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+        toast.error('Use a JPEG, PNG, or WebP image.');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_PHOTO_BYTES) {
+        toast.error('Photo is too large. Use an image under 4 MB.');
+        e.target.value = '';
+        return;
+      }
+
+      try {
+        const dimensions = await getImageDimensions(file);
+        if (dimensions.width > MAX_PHOTO_DIMENSION || dimensions.height > MAX_PHOTO_DIMENSION) {
+          toast.error('Photo dimensions are too large. Use an image under 4096 x 4096 pixels.');
+          e.target.value = '';
+          return;
+        }
+      } catch {
+        toast.error('Could not read this image. Try another JPEG, PNG, or WebP file.');
+        e.target.value = '';
+        return;
+      }
+
       setPhotoFile(file);
       setShowPhotoCrop(true);
     }
@@ -121,7 +168,7 @@ export function PersonalInfoEditor() {
               <input
                 type="file"
                 id="photo-upload"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={handlePhotoUpload}
               />

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { Achievement } from '../../types/cv';
 import { DatePickerField } from '../date-picker-field';
+import { createId } from '../../utils/cv-schema';
 
 export function AchievementsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -17,7 +18,7 @@ export function AchievementsEditor() {
 
   const addAchievement = () => {
     const newItem: Achievement = {
-      id: Date.now().toString(),
+      id: createId(),
       title: '',
       description: '',
       date: '',

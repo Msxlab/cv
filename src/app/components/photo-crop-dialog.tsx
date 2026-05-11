@@ -47,8 +47,9 @@ export function PhotoCropDialog({ imageFile, onSave, onClose }: PhotoCropDialogP
       throw new Error('No 2d context');
     }
 
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
+    const outputSize = 512;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
 
     ctx.drawImage(
       image,
@@ -58,11 +59,11 @@ export function PhotoCropDialog({ imageFile, onSave, onClose }: PhotoCropDialogP
       pixelCrop.height,
       0,
       0,
-      pixelCrop.width,
-      pixelCrop.height
+      outputSize,
+      outputSize
     );
 
-    return canvas.toDataURL('image/jpeg', 0.95);
+    return canvas.toDataURL('image/jpeg', 0.88);
   };
 
   const handleSave = async () => {

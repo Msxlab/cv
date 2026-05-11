@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2, X } from 'lucide-react';
 import { Project } from '../../types/cv';
 import { DatePickerField } from '../date-picker-field';
+import { createId } from '../../utils/cv-schema';
 
 export function ProjectsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -17,7 +18,7 @@ export function ProjectsEditor() {
 
   const addProject = () => {
     const newProject: Project = {
-      id: Date.now().toString(),
+      id: createId(),
       name: '',
       role: '',
       description: '',

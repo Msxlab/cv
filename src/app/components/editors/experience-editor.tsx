@@ -9,6 +9,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Experience } from '../../types/cv';
 import { QuickTips } from '../quick-tips';
 import { DatePickerField } from '../date-picker-field';
+import { createId } from '../../utils/cv-schema';
 
 export function ExperienceEditor() {
   const { currentCV, updateCV } = useCV();
@@ -19,7 +20,7 @@ export function ExperienceEditor() {
 
   const addExperience = () => {
     const newExp: Experience = {
-      id: Date.now().toString(),
+      id: createId(),
       company: '',
       position: '',
       location: '',
@@ -28,7 +29,6 @@ export function ExperienceEditor() {
       current: false,
       responsibilities: [''],
       achievements: [],
-      metrics: [],
     };
     updateCV({ experiences: [...experiences, newExp] });
   };
@@ -40,7 +40,9 @@ export function ExperienceEditor() {
   const updateExperience = (id: string, field: keyof Experience, value: any) => {
     updateCV({
       experiences: experiences.map(exp =>
-        exp.id === id ? { ...exp, [field]: value } : exp
+        exp.id === id
+          ? { ...exp, [field]: value, ...(field === 'current' && value ? { endDate: '' } : {}) }
+          : exp
       ),
     });
   };
@@ -66,6 +68,29 @@ export function ExperienceEditor() {
     if (exp) {
       const updated = exp.responsibilities.filter((_, i) => i !== index);
       updateExperience(id, 'responsibilities', updated);
+    }
+  };
+
+  const addAchievement = (id: string) => {
+    const exp = experiences.find(e => e.id === id);
+    if (exp) {
+      updateExperience(id, 'achievements', [...exp.achievements, '']);
+    }
+  };
+
+  const updateAchievement = (id: string, index: number, value: string) => {
+    const exp = experiences.find(e => e.id === id);
+    if (exp) {
+      const updated = [...exp.achievements];
+      updated[index] = value;
+      updateExperience(id, 'achievements', updated);
+    }
+  };
+
+  const removeAchievement = (id: string, index: number) => {
+    const exp = experiences.find(e => e.id === id);
+    if (exp) {
+      updateExperience(id, 'achievements', exp.achievements.filter((_, i) => i !== index));
     }
   };
 
@@ -162,7 +187,7 @@ export function ExperienceEditor() {
                 id={`current-${exp.id}`}
                 checked={exp.current}
                 onCheckedChange={(checked) =>
-                  updateExperience(exp.id, 'current', checked)
+                  updateExperience(exp.id, 'current', Boolean(checked))
                 }
               />
               <label htmlFor={`current-${exp.id}`} className="text-sm">
@@ -195,6 +220,43 @@ export function ExperienceEditor() {
                     size="sm"
                     variant="outline"
                     onClick={() => removeResponsibility(exp.id, respIdx)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Key Achievements</Label>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => addAchievement(exp.id)}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Achievement
+                </Button>
+              </div>
+              {exp.achievements.length === 0 && (
+                <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 p-3 text-sm text-slate-500">
+                  Add measurable wins separately if you want them emphasized in templates and exports.
+                </p>
+              )}
+              {exp.achievements.map((achievement, achievementIdx) => (
+                <div key={achievementIdx} className="flex gap-2 mb-2">
+                  <Textarea
+                    value={achievement}
+                    onChange={(e) => updateAchievement(exp.id, achievementIdx, e.target.value)}
+                    placeholder="Increased conversion by 18% through..."
+                    rows={2}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => removeAchievement(exp.id, achievementIdx)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

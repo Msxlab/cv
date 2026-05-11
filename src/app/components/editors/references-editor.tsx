@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { Reference } from '../../types/cv';
+import { createId } from '../../utils/cv-schema';
 
 export function ReferencesEditor() {
   const { currentCV, updateCV } = useCV();
@@ -15,7 +16,7 @@ export function ReferencesEditor() {
 
   const addReference = () => {
     const newItem: Reference = {
-      id: Date.now().toString(),
+      id: createId(),
       name: '',
       position: '',
       company: '',

@@ -8,6 +8,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Plus, Trash2 } from 'lucide-react';
 import { Education } from '../../types/cv';
 import { DatePickerField } from '../date-picker-field';
+import { createId } from '../../utils/cv-schema';
 
 export function EducationEditor() {
   const { currentCV, updateCV } = useCV();
@@ -18,7 +19,7 @@ export function EducationEditor() {
 
   const addEducation = () => {
     const newEdu: Education = {
-      id: Date.now().toString(),
+      id: createId(),
       institution: '',
       degree: '',
       field: '',
@@ -37,7 +38,9 @@ export function EducationEditor() {
   const updateEducation = (id: string, field: keyof Education, value: any) => {
     updateCV({
       education: education.map(edu =>
-        edu.id === id ? { ...edu, [field]: value } : edu
+        edu.id === id
+          ? { ...edu, [field]: value, ...(field === 'current' && value ? { endDate: '' } : {}) }
+          : edu
       ),
     });
   };
@@ -150,7 +153,7 @@ export function EducationEditor() {
                 id={`current-${edu.id}`}
                 checked={edu.current}
                 onCheckedChange={(checked) =>
-                  updateEducation(edu.id, 'current', checked)
+                  updateEducation(edu.id, 'current', Boolean(checked))
                 }
               />
               <label htmlFor={`current-${edu.id}`} className="text-sm">

@@ -54,16 +54,6 @@ const tipsContent: Record<string, { icon: any; tips: string[] }> = {
       'Explain your specific role and contributions',
     ],
   },
-  ats: {
-    icon: Target,
-    tips: [
-      'Use standard section headings',
-      'Include keywords from job descriptions',
-      'Avoid images, tables, and complex formatting',
-      'Use simple bullet points',
-      'Save final CV as PDF',
-    ],
-  },
 };
 
 export function QuickTips({ section }: QuickTipsProps) {

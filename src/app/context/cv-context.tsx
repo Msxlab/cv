@@ -1,286 +1,344 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { CVData, JobDescription, ATSAnalysis, ContentSuggestion } from '../types/cv';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { CVData } from '../types/cv';
+import {
+  clearAppSessionStorage,
+  createEmptyCV,
+  createId,
+  ensureUniqueCVIds,
+  hasMeaningfulCVContent,
+  loadSessionFromStorage,
+  normalizeCVData,
+  saveSessionToStorage,
+  StoredSessionState,
+} from '../utils/cv-schema';
+
+type SaveStatus = 'idle' | 'unsaved' | 'saved' | 'error';
+export type ExportKind = 'backup' | 'pdf' | 'docx';
 
 interface CVContextType {
   cvs: CVData[];
   currentCV: CVData | null;
-  jobDescription: JobDescription | null;
-  atsAnalysis: ATSAnalysis | null;
-  suggestions: ContentSuggestion[];
   history: CVData[][];
   historyIndex: number;
-  createCV: (name: string, initialData?: Partial<CVData>) => void;
+  saveStatus: SaveStatus;
+  lastSavedAt?: string;
+  lastExportedAt?: string;
+  lastBackupExportedAt?: string;
+  lastPDFExportedAt?: string;
+  lastDOCXExportedAt?: string;
+  createCV: (name: string, initialData?: Partial<CVData>) => CVData;
+  importCVAsNew: (cv: CVData) => CVData;
+  replaceSessionWithCV: (cv: CVData) => CVData;
+  startNewCV: (name?: string) => CVData;
   selectCV: (id: string) => void;
   updateCV: (data: Partial<CVData>) => void;
   deleteCV: (id: string) => void;
   duplicateCV: (id: string) => void;
   clearAllData: () => void;
-  setJobDescription: (job: JobDescription | null) => void;
-  analyzeATS: () => void;
+  endSession: () => void;
+  markExported: (kind?: ExportKind) => void;
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  hasMeaningfulContent: (cv?: CVData | null) => boolean;
 }
 
 const CVContext = createContext<CVContextType | undefined>(undefined);
+const MAX_HISTORY = 75;
 
-const createEmptyCV = (name: string): CVData => ({
-  id: Date.now().toString(),
-  name,
-  language: 'en',
-  template: 'modern',
-  layout: 'single',
-  accentColor: 'blue',
-  fontFamily: 'sans',
-  fontSize: 'medium',
-  spacing: 'normal',
-  showPhoto: true,
-  personalInfo: {
-    firstName: '',
-    lastName: '',
-    headline: '',
-    summary: '',
-    email: '',
-    phone: '',
-    location: '',
-    otherLinks: [],
-  },
-  experiences: [],
-  education: [],
-  skills: [],
-  certifications: [],
-  projects: [],
-  achievements: [],
-  languages: [],
-  volunteers: [],
-  publications: [],
-  references: [],
-  customSections: [],
-  sectionOrder: [
-    'personalInfo',
-    'summary',
-    'experiences',
-    'education',
-    'skills',
-    'projects',
-    'certifications',
-    'achievements',
-    'languages',
-    'volunteers',
-    'publications',
-    'references',
-  ],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-});
+function pushHistorySnapshot(history: CVData[][], snapshot: CVData[], historyIndex: number) {
+  const nextHistory = history.slice(0, historyIndex + 1);
+  nextHistory.push(snapshot);
+  return nextHistory.slice(-MAX_HISTORY);
+}
 
 export const CVProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cvs, setCVs] = useState<CVData[]>([]);
   const [currentCV, setCurrentCV] = useState<CVData | null>(null);
-  const [jobDescription, setJobDescription] = useState<JobDescription | null>(null);
-  const [atsAnalysis, setAtsAnalysis] = useState<ATSAnalysis | null>(null);
-  const [suggestions, setSuggestions] = useState<ContentSuggestion[]>([]);
   const [history, setHistory] = useState<CVData[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [sessionState, setSessionState] = useState<StoredSessionState>({ initialized: false });
+  const [hydrated, setHydrated] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const skipNextPersistRef = useRef(false);
 
-  // Initialize: load from sessionStorage, or create a fresh empty CV
   useEffect(() => {
-    const savedCVs = sessionStorage.getItem('cvs');
-    const savedCurrentCVId = sessionStorage.getItem('currentCVId');
+    const loaded = loadSessionFromStorage();
+    setCVs(loaded.cvs);
+    setCurrentCV(loaded.cvs.find((cv) => cv.id === loaded.currentCVId) || loaded.cvs[0] || null);
+    setHistory(loaded.cvs.length > 0 ? [loaded.cvs] : []);
+    setHistoryIndex(loaded.cvs.length > 0 ? 0 : -1);
+    setSessionState(loaded.sessionState);
+    setHydrated(true);
 
-    if (savedCVs) {
-      const parsedCVs = JSON.parse(savedCVs);
-      setCVs(parsedCVs);
-      const current = parsedCVs.find((cv: CVData) => cv.id === savedCurrentCVId);
-      setCurrentCV(current || parsedCVs[0] || null);
-      setHistory([parsedCVs]);
-      setHistoryIndex(0);
-    } else {
-      const initialCV = createEmptyCV('My Resume');
-      setCVs([initialCV]);
-      setCurrentCV(initialCV);
-      setHistory([[initialCV]]);
-      setHistoryIndex(0);
+    if (loaded.recoveredFromError) {
+      toast.error('We could not read your last session, so we started a fresh one.');
     }
   }, []);
 
-  // Auto-save to sessionStorage
   useEffect(() => {
-    if (cvs.length > 0) {
-      sessionStorage.setItem('cvs', JSON.stringify(cvs));
-      sessionStorage.setItem('currentCVId', currentCV?.id || '');
+    if (!hydrated) return;
+
+    if (skipNextPersistRef.current) {
+      skipNextPersistRef.current = false;
+      setSaveStatus('saved');
+      return;
     }
-  }, [cvs, currentCV]);
+
+    try {
+      const nextState = {
+        ...sessionState,
+        initialized: true,
+        lastSavedAt: new Date().toISOString(),
+      };
+      saveSessionToStorage(cvs, currentCV?.id || null, nextState);
+      setSessionState(nextState);
+      setSaveStatus('saved');
+    } catch (error) {
+      setSaveStatus('error');
+      toast.error('This tab is out of space. Download your backup before continuing.');
+    }
+  }, [
+    cvs,
+    currentCV?.id,
+    hydrated,
+    sessionState.lastBackupExportedAt,
+    sessionState.lastDOCXExportedAt,
+    sessionState.lastExportedAt,
+    sessionState.lastPDFExportedAt,
+  ]);
+
+  const replaceCVs = useCallback((nextCVs: CVData[], nextCurrentCV: CVData | null, trackHistory = true) => {
+    const uniqueCVs = ensureUniqueCVIds(nextCVs.map((cv) => normalizeCVData(cv)));
+    const safeCurrent = nextCurrentCV ? uniqueCVs.find((cv) => cv.id === nextCurrentCV.id) || uniqueCVs[0] || null : uniqueCVs[0] || null;
+
+    setSaveStatus('unsaved');
+    setCVs(uniqueCVs);
+    setCurrentCV(safeCurrent);
+
+    if (trackHistory && safeCurrent) {
+      setHistory((prev) => {
+        const next = pushHistorySnapshot(prev, uniqueCVs, historyIndex);
+        setHistoryIndex(next.length - 1);
+        return next;
+      });
+    }
+  }, [historyIndex]);
 
   const createCV = useCallback((name: string, initialData?: Partial<CVData>) => {
-    const newCV = { ...createEmptyCV(name), ...initialData };
-    if (initialData?.id) newCV.id = initialData.id;
-    if (initialData?.createdAt) newCV.createdAt = initialData.createdAt;
-    if (initialData?.updatedAt) newCV.updatedAt = initialData.updatedAt;
-    
-    setCVs(prev => [...prev, newCV]);
+    const now = new Date().toISOString();
+    const newCV = initialData
+      ? normalizeCVData(
+          {
+            ...initialData,
+            id: createId(),
+            name: initialData.name || name,
+            createdAt: initialData.createdAt || now,
+            updatedAt: initialData.updatedAt || now,
+          },
+          { forceNewId: true, fallbackName: name }
+        )
+      : createEmptyCV(name);
+
+    setSaveStatus('unsaved');
+    setCVs((prev) => ensureUniqueCVIds([...prev, newCV]));
     setCurrentCV(newCV);
+    setHistory((prev) => {
+      const snapshot = ensureUniqueCVIds([...cvs, newCV]);
+      const next = pushHistorySnapshot(prev, snapshot, historyIndex);
+      setHistoryIndex(next.length - 1);
+      return next;
+    });
+    return newCV;
+  }, [cvs, historyIndex]);
+
+  const importCVAsNew = useCallback((cv: CVData) => {
+    return createCV(cv.name || 'Imported Backup', cv);
+  }, [createCV]);
+
+  const replaceSessionWithCV = useCallback((cv: CVData) => {
+    clearAppSessionStorage();
+    const importedCV = normalizeCVData(cv, { forceNewId: true, fallbackName: cv.name || 'Imported Backup' });
+    setCVs([importedCV]);
+    setCurrentCV(importedCV);
+    setHistory([[importedCV]]);
+    setHistoryIndex(0);
+    setSessionState({ initialized: true });
+    setSaveStatus('unsaved');
+    return importedCV;
+  }, []);
+
+  const startNewCV = useCallback((name = 'My Resume') => {
+    clearAppSessionStorage();
+    const newCV = createEmptyCV(name);
+    setCVs([newCV]);
+    setCurrentCV(newCV);
+    setHistory([[newCV]]);
+    setHistoryIndex(0);
+    setSessionState({ initialized: true });
+    setSaveStatus('unsaved');
+    return newCV;
   }, []);
 
   const selectCV = useCallback((id: string) => {
-    const cv = cvs.find(c => c.id === id);
+    const cv = cvs.find((item) => item.id === id);
     if (cv) setCurrentCV(cv);
   }, [cvs]);
 
   const updateCV = useCallback((data: Partial<CVData>) => {
     if (!currentCV) return;
 
-    const updatedCV = {
+    const updatedCV = normalizeCVData({
       ...currentCV,
       ...data,
+      id: currentCV.id,
+      createdAt: currentCV.createdAt,
       updatedAt: new Date().toISOString(),
-    };
-
-    setCurrentCV(updatedCV);
-    
-    setCVs(prevCVs => {
-      const newCVs = prevCVs.map(cv => cv.id === currentCV.id ? updatedCV : cv);
-      
-      // Update history for undo/redo
-      setHistory(prevHistory => {
-        const newHistory = prevHistory.slice(0, historyIndex + 1);
-        newHistory.push(newCVs);
-        return newHistory;
-      });
-      setHistoryIndex(prevIndex => prevIndex + 1);
-      
-      return newCVs;
     });
-  }, [currentCV, historyIndex]);
+
+    const nextCVs = cvs.map((cv) => (cv.id === currentCV.id ? updatedCV : cv));
+    replaceCVs(nextCVs, updatedCV);
+  }, [currentCV, cvs, replaceCVs]);
 
   const deleteCV = useCallback((id: string) => {
-    setCVs(prev => {
-      const filtered = prev.filter(cv => cv.id !== id);
-      if (currentCV?.id === id) {
-        setCurrentCV(filtered.length > 0 ? filtered[0] : null);
-      }
-      return filtered;
-    });
-  }, [currentCV]);
+    const nextCVs = cvs.filter((cv) => cv.id !== id);
+    const nextCurrent = currentCV?.id === id ? nextCVs[0] || null : currentCV;
+    replaceCVs(nextCVs, nextCurrent);
+  }, [currentCV, cvs, replaceCVs]);
 
   const duplicateCV = useCallback((id: string) => {
-    const cv = cvs.find(c => c.id === id);
+    const cv = cvs.find((item) => item.id === id);
     if (!cv) return;
 
-    const duplicatedCV = {
-      ...cv,
-      id: Date.now().toString(),
-      name: `${cv.name} (Copy)`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setCVs(prev => [...prev, duplicatedCV]);
-    setCurrentCV(duplicatedCV);
-  }, [cvs]);
+    const duplicatedCV = normalizeCVData(
+      {
+        ...cv,
+        id: createId(),
+        name: `${cv.name} (Copy)`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { forceNewId: true }
+    );
+    replaceCVs([...cvs, duplicatedCV], duplicatedCV);
+  }, [cvs, replaceCVs]);
 
   const clearAllData = useCallback(() => {
-    const confirmClear = window.confirm(
-      'This will delete all your CVs. This action cannot be undone. Continue?'
-    );
-    
-    if (confirmClear) {
-      const newCV = createEmptyCV('My Resume');
-      setCVs([newCV]);
-      setCurrentCV(newCV);
-      setJobDescription(null);
-      setAtsAnalysis(null);
-      setSuggestions([]);
-      setHistory([[newCV]]);
-      setHistoryIndex(0);
-      sessionStorage.clear();
-    }
+    clearAppSessionStorage();
+    skipNextPersistRef.current = true;
+    setCVs([]);
+    setCurrentCV(null);
+    setHistory([]);
+    setHistoryIndex(-1);
+    setSessionState({ initialized: true });
+    setSaveStatus('saved');
   }, []);
 
-  const analyzeATS = useCallback(() => {
-    if (!currentCV) return;
+  const endSession = useCallback(() => {
+    clearAllData();
+  }, [clearAllData]);
 
-    // Mock ATS analysis - in real app, this would use AI/ML
-    const keywords = jobDescription?.keywords || [];
-    const cvText = JSON.stringify(currentCV).toLowerCase();
-    
-    const missingKeywords = keywords.filter(
-      keyword => !cvText.includes(keyword.toLowerCase())
-    );
+  const markExported = useCallback((kind: ExportKind = 'backup') => {
+    const now = new Date().toISOString();
+    setSessionState((prev) => ({
+      ...prev,
+      initialized: true,
+      lastExportedAt: now,
+      lastBackupExportedAt: kind === 'backup' ? now : prev.lastBackupExportedAt,
+      lastPDFExportedAt: kind === 'pdf' ? now : prev.lastPDFExportedAt,
+      lastDOCXExportedAt: kind === 'docx' ? now : prev.lastDOCXExportedAt,
+    }));
+  }, []);
 
-    const score = Math.max(0, 100 - (missingKeywords.length * 10));
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasMeaningfulCVContent(currentCV)) return;
+      if (sessionState.lastBackupExportedAt && currentCV?.updatedAt && sessionState.lastBackupExportedAt >= currentCV.updatedAt) return;
 
-    const analysis: ATSAnalysis = {
-      score,
-      missingKeywords,
-      suggestions: [
-        'Add more quantifiable achievements with metrics',
-        'Use action verbs at the start of bullet points',
-        'Include relevant technical keywords from job description',
-      ],
-      warnings: [
-        currentCV.experiences.length === 0 ? 'No work experience added' : '',
-        currentCV.skills.length < 5 ? 'Add more relevant skills' : '',
-      ].filter(Boolean),
-      strengths: [
-        currentCV.personalInfo.summary ? 'Professional summary present' : '',
-        currentCV.projects.length > 0 ? 'Projects section included' : '',
-      ].filter(Boolean),
+      event.preventDefault();
+      event.returnValue = '';
     };
 
-    setAtsAnalysis(analysis);
-  }, [currentCV, jobDescription]);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [currentCV, sessionState.lastBackupExportedAt]);
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      setCVs(history[newIndex]);
-      setHistoryIndex(newIndex);
-      
-      const currentId = currentCV?.id;
-      if (currentId) {
-        const restoredCV = history[newIndex].find(cv => cv.id === currentId);
-        if (restoredCV) setCurrentCV(restoredCV);
-      }
+      const nextIndex = historyIndex - 1;
+      const snapshot = history[nextIndex];
+      setCVs(snapshot);
+      setHistoryIndex(nextIndex);
+      setCurrentCV((prev) => (prev ? snapshot.find((cv) => cv.id === prev.id) || snapshot[0] || null : snapshot[0] || null));
+      setSaveStatus('unsaved');
     }
-  }, [history, historyIndex, currentCV]);
+  }, [history, historyIndex]);
 
   const redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      setCVs(history[newIndex]);
-      setHistoryIndex(newIndex);
-      
-      const currentId = currentCV?.id;
-      if (currentId) {
-        const restoredCV = history[newIndex].find(cv => cv.id === currentId);
-        if (restoredCV) setCurrentCV(restoredCV);
-      }
+      const nextIndex = historyIndex + 1;
+      const snapshot = history[nextIndex];
+      setCVs(snapshot);
+      setHistoryIndex(nextIndex);
+      setCurrentCV((prev) => (prev ? snapshot.find((cv) => cv.id === prev.id) || snapshot[0] || null : snapshot[0] || null));
+      setSaveStatus('unsaved');
     }
-  }, [history, historyIndex, currentCV]);
+  }, [history, historyIndex]);
 
-  const value: CVContextType = {
+  const value: CVContextType = useMemo(() => ({
     cvs,
     currentCV,
-    jobDescription,
-    atsAnalysis,
-    suggestions,
     history,
     historyIndex,
+    saveStatus,
+    lastSavedAt: sessionState.lastSavedAt,
+    lastExportedAt: sessionState.lastExportedAt,
+    lastBackupExportedAt: sessionState.lastBackupExportedAt,
+    lastPDFExportedAt: sessionState.lastPDFExportedAt,
+    lastDOCXExportedAt: sessionState.lastDOCXExportedAt,
     createCV,
+    importCVAsNew,
+    replaceSessionWithCV,
+    startNewCV,
     selectCV,
     updateCV,
     deleteCV,
     duplicateCV,
     clearAllData,
-    setJobDescription,
-    analyzeATS,
+    endSession,
+    markExported,
     undo,
     redo,
     canUndo: historyIndex > 0,
     canRedo: historyIndex < history.length - 1,
-  };
+    hasMeaningfulContent: (cv?: CVData | null) => hasMeaningfulCVContent(cv === undefined ? currentCV : cv),
+  }), [
+    cvs,
+    currentCV,
+    history,
+    historyIndex,
+    saveStatus,
+    sessionState.lastSavedAt,
+    sessionState.lastExportedAt,
+    sessionState.lastBackupExportedAt,
+    sessionState.lastPDFExportedAt,
+    sessionState.lastDOCXExportedAt,
+    createCV,
+    importCVAsNew,
+    replaceSessionWithCV,
+    startNewCV,
+    selectCV,
+    updateCV,
+    deleteCV,
+    duplicateCV,
+    clearAllData,
+    endSession,
+    markExported,
+    undo,
+    redo,
+  ]);
 
   return <CVContext.Provider value={value}>{children}</CVContext.Provider>;
 };

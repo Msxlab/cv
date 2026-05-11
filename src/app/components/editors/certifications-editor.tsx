@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { Certification } from '../../types/cv';
 import { DatePickerField } from '../date-picker-field';
+import { createId } from '../../utils/cv-schema';
 
 export function CertificationsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -16,7 +17,7 @@ export function CertificationsEditor() {
 
   const addCertification = () => {
     const newCert: Certification = {
-      id: Date.now().toString(),
+      id: createId(),
       name: '',
       issuer: '',
       date: '',

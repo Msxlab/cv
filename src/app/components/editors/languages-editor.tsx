@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { LanguageSkill } from '../../types/cv';
+import { createId } from '../../utils/cv-schema';
 
 export function LanguagesEditor() {
   const { currentCV, updateCV } = useCV();
@@ -16,7 +17,7 @@ export function LanguagesEditor() {
 
   const addLanguage = () => {
     const newLang: LanguageSkill = {
-      id: Date.now().toString(),
+      id: createId(),
       language: '',
       proficiency: 'intermediate',
     };

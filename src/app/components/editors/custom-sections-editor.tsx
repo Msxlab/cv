@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { CustomSection } from '../../types/cv';
+import { createId } from '../../utils/cv-schema';
 
 export function CustomSectionsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -16,15 +17,21 @@ export function CustomSectionsEditor() {
 
   const addSection = () => {
     const newItem: CustomSection = {
-      id: Date.now().toString(),
+      id: createId(),
       title: '',
       content: '',
     };
-    updateCV({ customSections: [...customSections, newItem] });
+    updateCV({
+      customSections: [...customSections, newItem],
+      sectionOrder: [...currentCV.sectionOrder, newItem.id],
+    });
   };
 
   const removeSection = (id: string) => {
-    updateCV({ customSections: customSections.filter(s => s.id !== id) });
+    updateCV({
+      customSections: customSections.filter(s => s.id !== id),
+      sectionOrder: currentCV.sectionOrder.filter((sectionId) => sectionId !== id),
+    });
   };
 
   const updateSection = (id: string, field: keyof CustomSection, value: string) => {

@@ -8,12 +8,14 @@ import { Language, AccentColor, FontSize, Spacing, TemplateName } from '../types
 import { accentColorOptions, templateOptions, fontFamilies, fontSizes, spacings, loadGoogleFont, templateSupportsDoubleLayout } from '../utils/template-styles';
 import { Check, Palette, Type, Maximize2, LayoutGrid } from 'lucide-react';
 import { useState } from 'react';
+import { TemplateGalleryDialog } from './template-gallery-dialog';
 
 export function SettingsPanel() {
   const { currentCV, updateCV } = useCV();
   const [customColor, setCustomColor] = useState(
     currentCV?.accentColor?.startsWith('#') ? currentCV.accentColor : '#000000'
   );
+  const [showTemplateGallery, setShowTemplateGallery] = useState(false);
 
   if (!currentCV) return null;
 
@@ -43,6 +45,12 @@ export function SettingsPanel() {
           <CardDescription>Choose a design template for your CV</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3">
+            <p className="text-sm text-blue-900">Compare all 17 templates with your CV before choosing.</p>
+            <Button variant="outline" onClick={() => setShowTemplateGallery(true)}>
+              Open Template Gallery
+            </Button>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {templateOptions.map((tmpl) => (
               <button
@@ -139,6 +147,9 @@ export function SettingsPanel() {
           <CardDescription>Choose the font style for your CV text</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+            Privacy Mode uses local/system fonts only. External Google Font loading is disabled.
+          </div>
           <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
             {Object.entries(
               Object.entries(fontFamilies).reduce((acc, [key, font]) => {
@@ -307,6 +318,13 @@ export function SettingsPanel() {
           />
         </CardContent>
       </Card>
+
+      <TemplateGalleryDialog
+        open={showTemplateGallery}
+        currentCV={currentCV}
+        onSelect={handleTemplateChange}
+        onClose={() => setShowTemplateGallery(false)}
+      />
     </div>
   );
 }

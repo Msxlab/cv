@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { Skill, SkillLevel } from '../../types/cv';
+import { createId } from '../../utils/cv-schema';
 
 export function SkillsEditor() {
   const { currentCV, updateCV } = useCV();
@@ -16,7 +17,7 @@ export function SkillsEditor() {
 
   const addSkill = () => {
     const newSkill: Skill = {
-      id: Date.now().toString(),
+      id: createId(),
       name: '',
       category: 'Technical Skills',
       level: 'intermediate',

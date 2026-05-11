@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cyber Warriors - PonyCot">
+  <defs>
+    <linearGradient id="cw-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B1220"/>
+      <stop offset="55%" stop-color="#101a2e"/>
+      <stop offset="100%" stop-color="#070b15"/>
+    </linearGradient>
+    <linearGradient id="cw-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F5E7A1"/>
+      <stop offset="45%" stop-color="#E8C766"/>
+      <stop offset="100%" stop-color="#B8892B"/>
+    </linearGradient>
+    <linearGradient id="cw-gold-soft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5E7A1" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#B8892B" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="128" height="128" rx="26" fill="url(#cw-bg)"/>
+
+  <!-- Inner luxury frame -->
+  <rect x="10" y="10" width="108" height="108" rx="20" fill="none" stroke="url(#cw-gold)" stroke-opacity="0.22" stroke-width="1"/>
+
+  <!-- Hexagonal shield crest -->
+  <path d="M64 18 L102 38 V78 L64 110 L26 78 V38 Z"
+        fill="url(#cw-gold-soft)" stroke="url(#cw-gold)" stroke-width="1.6" stroke-linejoin="round"/>
+
+  <!-- Interlocking CW monogram -->
+  <g fill="none" stroke="url(#cw-gold)" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- C arc -->
+    <path d="M76 46 A20 20 0 1 0 76 84"/>
+    <!-- W chevrons -->
+    <path d="M50 50 L58 82 L64 64 L70 82 L78 50"/>
+  </g>
+
+  <!-- Tiny luxury accent dots -->
+  <circle cx="64" cy="22" r="1.6" fill="url(#cw-gold)"/>
+  <circle cx="64" cy="106" r="1.6" fill="url(#cw-gold)"/>
+</svg>

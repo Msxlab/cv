@@ -1,0 +1,17 @@
+{
+  "name": "Cyber Warriors - PonyCot",
+  "short_name": "PonyCot",
+  "description": "Cyber Warriors - PonyCot — a premium, private CV studio. Build, refine, and export polished resumes entirely in your browser.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1220",
+  "theme_color": "#0B1220",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

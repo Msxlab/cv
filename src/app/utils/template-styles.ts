@@ -90,16 +90,12 @@ export const fontFamilies: Record<string, FontDef> = {
   oswald: { label: 'Oswald', css: '"Oswald", sans-serif', google: 'Oswald', category: 'Display' },
 };
 
-// Load Google Fonts dynamically
 const loadedFonts = new Set<string>();
 export function loadGoogleFont(fontKey: string) {
   const font = fontFamilies[fontKey];
   if (!font?.google || loadedFonts.has(fontKey)) return;
   loadedFonts.add(fontKey);
-  const link = document.createElement('link');
-  link.href = `https://fonts.googleapis.com/css2?family=${font.google}:wght@300;400;500;600;700&display=swap`;
-  link.rel = 'stylesheet';
-  document.head.appendChild(link);
+  // Privacy mode intentionally avoids external font requests. Font names fall back to local/system fonts.
 }
 
 // Font size multipliers
@@ -130,23 +126,39 @@ export const templatesWithDoubleLayout = new Set<TemplateName>(['classic', 'mode
 
 export const templateSupportsDoubleLayout = (template: TemplateName) => templatesWithDoubleLayout.has(template);
 
+export type TemplateCategory = 'Professional' | 'Modern' | 'Creative' | 'Executive' | 'Academic' | 'Compact';
+
+export interface TemplateOption {
+  value: TemplateName;
+  label: string;
+  description: string;
+  bestFor: string;
+  category: TemplateCategory;
+  supportsPhoto: boolean;
+  supportsAllSections: boolean;
+  supportsDoubleLayout: boolean;
+  tags: string[];
+}
+
 // Template info for the template picker
-export const templateOptions: { value: TemplateName; label: string; description: string; supportsDoubleLayout: boolean }[] = [
-  { value: 'modern', label: 'Modern', description: 'Clean and contemporary', supportsDoubleLayout: true },
-  { value: 'classic', label: 'Classic', description: 'Traditional professional layout', supportsDoubleLayout: true },
-  { value: 'executive', label: 'Executive', description: 'Dark header for senior roles', supportsDoubleLayout: true },
-  { value: 'technical', label: 'Technical', description: 'Sidebar layout for developers', supportsDoubleLayout: false },
-  { value: 'creative', label: 'Creative', description: 'Colorful gradient header', supportsDoubleLayout: false },
-  { value: 'minimalist', label: 'Minimalist', description: 'Ultra-clean whitespace', supportsDoubleLayout: false },
-  { value: 'elegant', label: 'Elegant', description: 'Refined typography', supportsDoubleLayout: false },
-  { value: 'compact', label: 'Compact', description: 'Dense single-page layout', supportsDoubleLayout: false },
-  { value: 'academic', label: 'Academic', description: 'Scholarly design', supportsDoubleLayout: false },
-  { value: 'infographic', label: 'Infographic', description: 'Visual skill bars', supportsDoubleLayout: false },
-  { value: 'bold', label: 'Bold', description: 'Eye-catching oversized header', supportsDoubleLayout: false },
-  { value: 'twotone', label: 'Two-Tone', description: 'Dark/light split sidebar', supportsDoubleLayout: false },
-  { value: 'timeline', label: 'Timeline', description: 'Vertical timeline layout', supportsDoubleLayout: false },
-  { value: 'metro', label: 'Metro', description: 'Tile-based modern metro', supportsDoubleLayout: false },
-  { value: 'newspaper', label: 'Newspaper', description: 'Multi-column press style', supportsDoubleLayout: false },
-  { value: 'gradient', label: 'Gradient', description: 'Smooth gradient backgrounds', supportsDoubleLayout: false },
-  { value: 'swiss', label: 'Swiss', description: 'Grid-based Swiss design', supportsDoubleLayout: false },
+export const templateOptions: TemplateOption[] = [
+  { value: 'modern', label: 'Modern', description: 'Clean and contemporary', bestFor: 'Generalist - mid-career', category: 'Modern', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: true, tags: ['Clean layout', 'Supports all sections'] },
+  { value: 'classic', label: 'Classic', description: 'Traditional professional layout', bestFor: 'Conservative industries', category: 'Professional', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: true, tags: ['Traditional', 'Supports all sections'] },
+  { value: 'executive', label: 'Executive', description: 'Dark header for senior roles', bestFor: 'Senior leadership', category: 'Executive', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: true, tags: ['Best for senior roles', 'Supports all sections'] },
+  { value: 'technical', label: 'Technical', description: 'Monospaced developer feel', bestFor: 'Developers', category: 'Modern', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Technical', 'Supports all sections'] },
+  { value: 'creative', label: 'Creative', description: 'Colorful gradient header', bestFor: 'Design and marketing', category: 'Creative', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Creative', 'Photo'] },
+  { value: 'minimalist', label: 'Minimalist', description: 'Ultra-clean whitespace', bestFor: 'Mid-career - neutral', category: 'Modern', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Clean layout', 'Best for 1 page'] },
+  { value: 'elegant', label: 'Elegant', description: 'Refined serif typography', bestFor: 'Comms and hospitality', category: 'Professional', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Refined'] },
+  { value: 'compact', label: 'Compact', description: 'Dense single-page layout', bestFor: 'One-page CVs', category: 'Compact', supportsPhoto: false, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Dense layout', 'Best for 1 page'] },
+  { value: 'academic', label: 'Academic', description: 'Scholarly design', bestFor: 'PhD and postdoc', category: 'Academic', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Scholarly', 'Supports all sections'] },
+  { value: 'infographic', label: 'Infographic', description: 'Visual skill bars', bestFor: 'Design junior portfolios', category: 'Creative', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Creative', 'Photo'] },
+  { value: 'bold', label: 'Bold', description: 'Eye-catching oversized header', bestFor: 'Statement CVs', category: 'Creative', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Best for senior roles', 'Photo'] },
+  { value: 'twotone', label: 'Two-Tone', description: 'Dark/light split sidebar', bestFor: 'Designers and sales', category: 'Creative', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Creative', 'Photo'] },
+  { value: 'timeline', label: 'Timeline', description: 'Vertical timeline layout', bestFor: 'Career progression stories', category: 'Modern', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Timeline', 'Supports all sections'] },
+  { value: 'metro', label: 'Metro', description: 'Tile-based modern metro', bestFor: 'Creative junior', category: 'Creative', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Creative'] },
+  { value: 'newspaper', label: 'Newspaper', description: 'Multi-column press style', bestFor: 'Editorial and journalism', category: 'Creative', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Editorial'] },
+  { value: 'gradient', label: 'Gradient', description: 'Smooth gradient backgrounds', bestFor: 'Trendy junior', category: 'Creative', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Creative'] },
+  { value: 'swiss', label: 'Swiss', description: 'Grid-based Swiss design', bestFor: 'Designers - modern', category: 'Modern', supportsPhoto: true, supportsAllSections: true, supportsDoubleLayout: false, tags: ['Grid layout', 'Supports all sections'] },
 ];
+
+export const templateOptionByValue = Object.fromEntries(templateOptions.map((tmpl) => [tmpl.value, tmpl])) as Record<TemplateName, TemplateOption>;
